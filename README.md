@@ -1,1 +1,165 @@
-# mcp_server_manager
+# MCP Server Manager
+
+MCPサーバープロセスを管理するためのElectronベースのGUIアプリケーション
+
+## 機能
+
+- **プロセス管理**: Windows/macOS/Linuxでのプロセス起動・停止
+- **WSL対応**: Windows WSL内でのプロセス実行
+- **ログ管理**: 標準出力/エラー出力の分離記録とローテーション
+- **多言語対応**: 日本語/英語
+- **ダークモード**: UIテーマの切り替え
+- **自動起動**: アプリ起動時の自動プロセス起動
+
+## 対応OS
+
+- Windows 10/11 (WSL対応)
+- macOS 10.15+
+- Linux (Ubuntu/Debian, RHEL/CentOS/Fedora)
+
+## 開発環境のセットアップ
+
+### 必要要件
+
+- Node.js 18.x以上
+- npm または yarn
+- Git
+
+### インストール
+
+```bash
+# リポジトリのクローン
+git clone <repository-url>
+cd mcp_server_manager
+
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+```
+
+## ビルド
+
+### 全プラットフォーム向けビルド
+```bash
+npm run dist
+```
+
+### プラットフォーム別ビルド
+```bash
+# Windows
+npm run dist:win
+
+# macOS
+npm run dist:mac
+
+# Linux
+npm run dist:linux
+```
+
+## プロジェクト構造
+
+```
+mcp_server_manager/
+├── src/
+│   ├── main/              # Electronメインプロセス
+│   │   ├── index.ts        # エントリポイント
+│   │   ├── ipc/            # IPCハンドラー
+│   │   ├── services/       # サービス層
+│   │   └── utils/          # ユーティリティ
+│   ├── renderer/           # Reactレンダラープロセス
+│   │   ├── App.tsx         # メインコンポーネント
+│   │   ├── components/     # UIコンポーネント
+│   │   ├── pages/          # ページコンポーネント
+│   │   ├── store/          # 状態管理
+│   │   └── i18n/           # 多言語対応
+│   ├── shared/             # 共通型定義
+│   └── preload/            # プリロードスクリプト
+├── public/                 # 静的ファイル
+└── dist/                   # ビルド出力
+```
+
+## 使用技術
+
+- **Electron**: デスクトップアプリケーションフレームワーク
+- **React**: UIフレームワーク
+- **TypeScript**: 型安全な開発
+- **Material-UI**: UIコンポーネント
+- **Zustand**: 状態管理
+- **i18next**: 多言語対応
+- **Vite**: ビルドツール
+
+## ライセンス
+
+MIT
+
+## 開発者向け情報
+
+### デバッグ
+
+開発モードでは自動的にDevToolsが開きます。
+
+### データファイルの保存場所
+
+すべてのデータは `~/.mcpm` ディレクトリに保存されます：
+
+- **設定ファイル**: `~/.mcpm/config.json`
+- **ログファイル**: `~/.mcpm/logs/`
+
+#### ファイル構造
+```
+~/.mcpm/
+├── config.json      # 設定とMCPサーバー定義
+└── logs/           # ログファイル
+    ├── log_[server_id]_[date]_[hour]_stdout.log
+    └── log_[server_id]_[date]_[hour]_stderr.log
+```
+
+#### config.json の形式
+
+MCP Client標準形式に準拠した設定ファイル：
+
+```json
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "displayName": "Sequential Thinking Server",
+      "platform": "host",
+      "autoStart": true
+    },
+    "file-server": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "displayName": "File Server",
+      "platform": "wsl",
+      "wslDistribution": "Ubuntu",
+      "autoStart": false
+    }
+  },
+  "settings": {
+    "language": "ja",
+    "darkMode": false,
+    "logDirectory": "~/.mcpm/logs",
+    "wslLogDirectories": {
+      "Ubuntu": "~/.mcpm/logs"
+    },
+    "logRetentionDays": 7
+  }
+}
+```
+
+#### MCPサーバー設定項目
+
+- **command**: 実行コマンド（必須）
+- **args**: コマンド引数の配列（必須）
+- **env**: 環境変数（オプション）
+- **displayName**: 表示名（オプション）
+- **platform**: 実行環境 ("host" | "wsl")
+- **wslDistribution**: WSLディストリビューション名（WSL利用時）
+- **autoStart**: アプリ起動時の自動実行

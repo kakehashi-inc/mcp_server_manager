@@ -1,0 +1,84 @@
+export default {
+  app: {
+    title: 'MCP Server Manager'
+  },
+  nav: {
+    processes: 'Processes',
+    settings: 'Settings',
+    logs: 'Logs'
+  },
+  process: {
+    title: 'Process Management',
+    add: 'Add Process',
+    edit: 'Edit',
+    delete: 'Delete',
+    start: 'Start',
+    stop: 'Stop',
+    status: {
+      running: 'Running',
+      stopped: 'Stopped',
+      error: 'Error'
+    },
+    fields: {
+      name: 'Name',
+      displayName: 'Display Name',
+      command: 'Command',
+      args: 'Arguments',
+      env: 'Environment Variables',
+      platform: 'Platform',
+      wslDistribution: 'WSL Distribution',
+      autoStart: 'Auto Start',
+      status: 'Status',
+      actions: 'Actions'
+    },
+    platform: {
+      host: 'Host OS',
+      wsl: 'WSL'
+    },
+    dialog: {
+      addTitle: 'New MCP Server',
+      editTitle: 'Edit MCP Server',
+      deleteTitle: 'Confirm Delete',
+      deleteMessage: 'Are you sure you want to delete this MCP server?',
+      argsTip: 'Enter arguments separated by line breaks',
+      envTip: 'Enter environment variables as "name:value" separated by line breaks',
+      displayNameTip: 'Enter display name (optional)',
+      idExists: 'A server with this name already exists'
+    }
+  },
+  settings: {
+    title: 'Settings',
+    general: 'General',
+    appearance: 'Appearance',
+    logs: 'Logs',
+    language: 'Language',
+    darkMode: 'Dark Mode',
+    logDirectory: 'Log Directory',
+    logRetentionDays: 'Log Retention Days',
+    wslLogDirectories: 'WSL Log Directories',
+    save: 'Save',
+    saved: 'Settings saved',
+    browse: 'Browse',
+    days: 'days'
+  },
+  logs: {
+    title: 'Log Viewer',
+    stdout: 'Standard Output',
+    stderr: 'Error Output',
+    clear: 'Clear',
+    refresh: 'Refresh',
+    lines: 'Lines',
+    noLogs: 'No logs available'
+  },
+  common: {
+    ok: 'OK',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    close: 'Close',
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+    info: 'Info'
+  }
+};

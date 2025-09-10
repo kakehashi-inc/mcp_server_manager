@@ -1,0 +1,84 @@
+export default {
+  app: {
+    title: 'MCP サーバーマネージャー'
+  },
+  nav: {
+    processes: 'プロセス',
+    settings: '設定',
+    logs: 'ログ'
+  },
+  process: {
+    title: 'プロセス管理',
+    add: 'プロセスを追加',
+    edit: '編集',
+    delete: '削除',
+    start: '起動',
+    stop: '停止',
+    status: {
+      running: '実行中',
+      stopped: '停止',
+      error: 'エラー'
+    },
+    fields: {
+      name: '名前',
+      displayName: '表示名',
+      command: 'コマンド',
+      args: '引数',
+      env: '環境変数',
+      platform: 'プラットフォーム',
+      wslDistribution: 'WSLディストリビューション',
+      autoStart: '自動起動',
+      status: 'ステータス',
+      actions: '操作'
+    },
+    platform: {
+      host: 'ホストOS',
+      wsl: 'WSL'
+    },
+    dialog: {
+      addTitle: '新規MCPサーバー',
+      editTitle: 'MCPサーバーを編集',
+      deleteTitle: '削除の確認',
+      deleteMessage: 'このMCPサーバーを削除してもよろしいですか？',
+      argsTip: '引数を改行で区切って入力',
+      envTip: '環境変数を「変数名:値」の形式で改行区切りで入力',
+      displayNameTip: '表示名（任意）を入力',
+      idExists: 'この名前のサーバーは既に存在します'
+    }
+  },
+  settings: {
+    title: '設定',
+    general: '一般',
+    appearance: '外観',
+    logs: 'ログ',
+    language: '言語',
+    darkMode: 'ダークモード',
+    logDirectory: 'ログディレクトリ',
+    logRetentionDays: 'ログ保持日数',
+    wslLogDirectories: 'WSLログディレクトリ',
+    save: '保存',
+    saved: '設定を保存しました',
+    browse: '参照',
+    days: '日'
+  },
+  logs: {
+    title: 'ログビューア',
+    stdout: '標準出力',
+    stderr: 'エラー出力',
+    clear: 'クリア',
+    refresh: '更新',
+    lines: '行数',
+    noLogs: 'ログがありません'
+  },
+  common: {
+    ok: 'OK',
+    cancel: 'キャンセル',
+    save: '保存',
+    delete: '削除',
+    close: '閉じる',
+    error: 'エラー',
+    success: '成功',
+    warning: '警告',
+    info: '情報'
+  }
+};
