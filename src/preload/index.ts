@@ -1,5 +1,27 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { IPC_CHANNELS } from '../shared/types';
+
+const IPC_CHANNELS = {
+  PROCESS_LIST: 'process:list',
+  PROCESS_CREATE: 'process:create',
+  PROCESS_UPDATE: 'process:update',
+  PROCESS_DELETE: 'process:delete',
+  PROCESS_START: 'process:start',
+  PROCESS_STOP: 'process:stop',
+  PROCESS_STATUS: 'process:status',
+  PROCESS_STATUS_UPDATE: 'process:status-update',
+  CONFIG_GET: 'config:get',
+  CONFIG_UPDATE: 'config:update',
+  WSL_CHECK: 'wsl:check',
+  WSL_LIST_DISTRIBUTIONS: 'wsl:list-distributions',
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_UPDATE: 'settings:update',
+  LOG_READ: 'log:read',
+  LOG_CLEAR: 'log:clear',
+  SYSTEM_INFO: 'system:info',
+  APP_QUIT: 'app:quit',
+  APP_MINIMIZE: 'app:minimize',
+  APP_MAXIMIZE: 'app:maximize'
+} as const;
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -38,7 +60,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Logs
   logAPI: {
-    read: (processId: string, type: 'stdout' | 'stderr', lines?: number) => 
+    read: (processId: string, type: 'stdout' | 'stderr', lines?: number) =>
       ipcRenderer.invoke(IPC_CHANNELS.LOG_READ, processId, type, lines),
     clear: (processId: string) => ipcRenderer.invoke(IPC_CHANNELS.LOG_CLEAR, processId)
   },

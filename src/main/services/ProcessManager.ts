@@ -1,9 +1,8 @@
 import { spawn, ChildProcess } from 'child_process';
-import { MCPServerConfig, ProcessStatus } from '@shared/types';
-import { PROCESS_CHECK_INTERVAL } from '@shared/constants';
+import { MCPServerConfig, ProcessStatus } from '../../shared/types';
+import { PROCESS_CHECK_INTERVAL } from '../../shared/constants';
 import { LogManager } from './LogManager';
 import { ConfigManager } from './ConfigManager';
-import { SystemUtils } from '../utils/SystemUtils';
 import { BrowserWindow } from 'electron';
 
 export class ProcessManager {
@@ -27,7 +26,7 @@ export class ProcessManager {
 
   private async initializeStatuses(): Promise<void> {
     const servers = this.configManager.getMCPServers();
-    
+
     for (const id of Object.keys(servers)) {
       this.processStatuses.set(id, {
         id,
@@ -39,7 +38,7 @@ export class ProcessManager {
 
   private async autoStartProcesses(): Promise<void> {
     const servers = this.configManager.getMCPServers();
-    
+
     for (const [id, config] of Object.entries(servers)) {
       if (config.autoStart) {
         await this.startProcess(id);
@@ -68,16 +67,16 @@ export class ProcessManager {
   async deleteProcess(id: string): Promise<boolean> {
     // Stop the process if running
     await this.stopProcess(id);
-    
+
     // Remove from config
     await this.configManager.deleteMCPServer(id);
-    
+
     // Remove status
     this.processStatuses.delete(id);
-    
+
     // Clear logs
     await this.logManager.clearLogs(id);
-    
+
     return true;
   }
 
@@ -87,17 +86,17 @@ export class ProcessManager {
     if (wasRunning) {
       await this.stopProcess(oldId);
     }
-    
+
     // Rename in config
     await this.configManager.renameMCPServer(oldId, newId);
-    
+
     // Update status
     const oldStatus = this.processStatuses.get(oldId);
     if (oldStatus) {
       this.processStatuses.delete(oldId);
       this.processStatuses.set(newId, { ...oldStatus, id: newId });
     }
-    
+
     // Restart if it was running
     if (wasRunning) {
       await this.startProcess(newId);
@@ -117,14 +116,14 @@ export class ProcessManager {
 
     try {
       let childProcess: ChildProcess;
-      
+
       if (config.platform === 'wsl' && config.wslDistribution) {
         // Execute in WSL
         const wslCommand = `wsl -d ${config.wslDistribution}`;
         const envStr = Object.entries(config.env || {})
           .map(([key, value]) => `${key}="${value}"`)
           .join(' ');
-        
+
         childProcess = spawn(wslCommand, [
           '-e', 'bash', '-c',
           `${envStr} ${config.command} ${config.args.join(' ')}`
@@ -143,7 +142,7 @@ export class ProcessManager {
 
       // Set up log streams
       await this.logManager.createLogStream(id);
-      
+
       childProcess.stdout?.on('data', async (data) => {
         await this.logManager.writeLog(id, 'stdout', data.toString());
       });
@@ -155,7 +154,7 @@ export class ProcessManager {
       childProcess.on('exit', async (code) => {
         this.runningProcesses.delete(id);
         await this.logManager.closeLogStream(id);
-        
+
         this.updateProcessStatus(id, {
           status: code === 0 ? 'stopped' : 'error',
           pid: undefined,
@@ -164,7 +163,7 @@ export class ProcessManager {
       });
 
       this.runningProcesses.set(id, childProcess);
-      
+
       this.updateProcessStatus(id, {
         status: 'running',
         pid: childProcess.pid,
@@ -203,7 +202,7 @@ export class ProcessManager {
         spawn('taskkill', ['/pid', childProcess.pid!.toString(), '/f', '/t']);
       } else {
         childProcess.kill('SIGTERM');
-        
+
         // Force kill after 5 seconds if still running
         setTimeout(() => {
           if (this.runningProcesses.has(id)) {
@@ -215,7 +214,7 @@ export class ProcessManager {
   }
 
   async stopAll(): Promise<void> {
-    const stopPromises = Array.from(this.runningProcesses.keys()).map(id => 
+    const stopPromises = Array.from(this.runningProcesses.keys()).map(id =>
       this.stopProcess(id)
     );
     await Promise.all(stopPromises);

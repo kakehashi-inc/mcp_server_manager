@@ -26,11 +26,13 @@ import {
   FolderOpen as FolderIcon
 } from '@mui/icons-material';
 import useStore from '../store/useStore';
-import { AppSettings } from '@shared/types';
+import { AppSettings } from '../../shared/types';
 
 const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { settings, wslDistributions, updateSettings } = useStore();
+  const settings = useStore((s) => s.config?.settings);
+  const wslDistributions = useStore((s) => s.wslDistributions);
+  const updateSettings = useStore((s) => s.updateSettings);
   const [localSettings, setLocalSettings] = useState<AppSettings | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [wslLogDirs, setWslLogDirs] = useState<Record<string, string>>({});
@@ -52,12 +54,12 @@ const SettingsPage: React.FC = () => {
 
     await window.electronAPI.settingsAPI.update(updatedSettings);
     updateSettings(updatedSettings);
-    
+
     // Apply language change immediately
     if (updatedSettings.language !== i18n.language) {
       i18n.changeLanguage(updatedSettings.language);
     }
-    
+
     setSaveSuccess(true);
   };
 
@@ -146,11 +148,11 @@ const SettingsPage: React.FC = () => {
             label={t('settings.logRetentionDays')}
             type="number"
             value={localSettings.logRetentionDays}
-            onChange={(e) => setLocalSettings({ 
-              ...localSettings, 
-              logRetentionDays: parseInt(e.target.value) || 7 
+            onChange={(e) => setLocalSettings({
+              ...localSettings,
+              logRetentionDays: parseInt(e.target.value) || 7
             })}
-            InputProps={{ 
+            InputProps={{
               inputProps: { min: 1, max: 365 },
               endAdornment: t('settings.days')
             }}

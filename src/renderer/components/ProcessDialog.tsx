@@ -19,7 +19,7 @@ import {
   Alert
 } from '@mui/material';
 import useStore from '../store/useStore';
-import { MCPServerConfig } from '@shared/types';
+import { MCPServerConfig } from '../../shared/types';
 
 interface ProcessDialogProps {
   open: boolean;
@@ -30,7 +30,7 @@ interface ProcessDialogProps {
 const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) => {
   const { t } = useTranslation();
   const { wslAvailable, wslDistributions, servers, addServer, updateServer } = useStore();
-  
+
   const [formData, setFormData] = useState({
     id: '',
     displayName: '',
@@ -41,7 +41,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
     wslDistribution: '',
     autoStart: false
   });
-  
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
     const args = formData.args
       .split('\n')
       .filter(arg => arg.trim() !== '');
-    
+
     const env: Record<string, string> = {};
     formData.env.split('\n').forEach(line => {
       const [key, value] = line.split(':');
@@ -127,7 +127,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
               {error}
             </Alert>
           )}
-          
+
           <TextField
             label={t('process.fields.name') + ' (ID)'}
             value={formData.id}

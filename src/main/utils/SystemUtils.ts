@@ -1,14 +1,14 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as os from 'os';
-import { SystemInfo, WSLDistribution } from '@shared/types';
+import { SystemInfo, WSLDistribution } from '../../shared/types';
 
 const execAsync = promisify(exec);
 
 export class SystemUtils {
   static async getSystemInfo(): Promise<SystemInfo> {
     const wslAvailable = await this.isWSLAvailable();
-    
+
     return {
       platform: process.platform,
       arch: process.arch,
@@ -48,7 +48,7 @@ export class SystemUtils {
           const name = isDefault ? parts[1] : parts[0];
           const stateIndex = isDefault ? 2 : 1;
           const versionIndex = isDefault ? 3 : 2;
-          
+
           if (name && name !== '') {
             distributions.push({
               name,
@@ -76,9 +76,9 @@ export class SystemUtils {
     const envStr = Object.entries(env)
       .map(([key, value]) => `${key}="${value}"`)
       .join(' ');
-    
+
     const fullCommand = `wsl -d ${distribution} ${envStr} ${command} ${args.join(' ')}`;
-    
+
     try {
       const { stdout, stderr } = await execAsync(fullCommand);
       return { stdout, stderr };
@@ -107,12 +107,12 @@ export class SystemUtils {
 
     try {
       const osRelease = require('fs').readFileSync('/etc/os-release', 'utf8');
-      
+
       if (type === 'ubuntu') {
         return osRelease.includes('Ubuntu') || osRelease.includes('Debian');
       } else if (type === 'rhel') {
-        return osRelease.includes('Red Hat') || osRelease.includes('CentOS') || 
-               osRelease.includes('Fedora') || osRelease.includes('Rocky') || 
+        return osRelease.includes('Red Hat') || osRelease.includes('CentOS') ||
+               osRelease.includes('Fedora') || osRelease.includes('Rocky') ||
                osRelease.includes('AlmaLinux');
       }
     } catch {

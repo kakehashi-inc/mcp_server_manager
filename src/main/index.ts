@@ -1,10 +1,11 @@
+import 'module-alias/register';
 import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
 import { initializeIPC } from './ipc';
 import { ProcessManager } from './services/ProcessManager';
 import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
-import { SystemUtils } from './utils/SystemUtils';
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -12,7 +13,7 @@ let processManager: ProcessManager;
 let configManager: ConfigManager;
 let logManager: LogManager;
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -23,15 +24,22 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
       preload: path.join(__dirname, '../preload/index.js')
     },
     frame: false,
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    icon: path.join(__dirname, '../../public/icon.png')
+    icon: ((): string | undefined => {
+      const pngPath = path.join(__dirname, '../../public/icon.png');
+      const svgPath = path.join(__dirname, '../../public/icon.svg');
+      if (fs.existsSync(pngPath)) return pngPath;
+      if (fs.existsSync(svgPath)) return svgPath;
+      return undefined;
+    })()
   });
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
+    mainWindow.loadURL('http://localhost:3001');
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
@@ -62,10 +70,16 @@ function createWindow() {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, '../../public/icon.png');
-  const trayIcon = nativeImage.createFromPath(iconPath);
-  tray = new Tray(trayIcon);
-  
+  const pngPath = path.join(__dirname, '../../public/icon.png');
+  const svgPath = path.join(__dirname, '../../public/icon.svg');
+  let trayIcon: Electron.NativeImage | null = null;
+  if (fs.existsSync(pngPath)) {
+    trayIcon = nativeImage.createFromPath(pngPath);
+  } else if (fs.existsSync(svgPath)) {
+    trayIcon = nativeImage.createFromPath(svgPath);
+  }
+  tray = new Tray(trayIcon || nativeImage.createEmpty());
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show',
@@ -80,10 +94,10 @@ function createTray() {
       }
     }
   ]);
-  
+
   tray.setToolTip('MCP Server Manager');
   tray.setContextMenu(contextMenu);
-  
+
   tray.on('double-click', () => {
     mainWindow?.show();
   });
@@ -93,19 +107,19 @@ async function initializeServices() {
   // Initialize managers
   configManager = new ConfigManager();
   await configManager.initialize();
-  
+
   logManager = new LogManager(configManager);
   await logManager.initialize();
-  
+
   processManager = new ProcessManager(logManager, configManager);
   await processManager.initialize();
-  
+
   // Initialize IPC handlers
   initializeIPC(processManager, configManager, logManager);
-  
+
   // Start process monitoring
   processManager.startMonitoring();
-  
+
   // Start log rotation
   logManager.startRotation();
 }
@@ -114,7 +128,7 @@ app.whenReady().then(async () => {
   await initializeServices();
   createWindow();
   createTray();
-  
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -131,7 +145,7 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async () => {
   // Stop all processes if needed
   await processManager.stopAll();
-  
+
   // Clean up
   processManager.stopMonitoring();
   logManager.stopRotation();

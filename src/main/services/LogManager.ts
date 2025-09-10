@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createWriteStream, WriteStream } from 'fs';
 import { ConfigManager } from './ConfigManager';
-import { LOG_ROTATION_INTERVAL } from '@shared/constants';
+import { LOG_ROTATION_INTERVAL } from '../../shared/constants';
 
 export class LogManager {
   private configManager: ConfigManager;
@@ -57,7 +57,7 @@ export class LogManager {
 
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] ${data}\n`;
-    
+
     if (type === 'stdout') {
       streams.stdout.write(logEntry);
     } else {
@@ -75,24 +75,23 @@ export class LogManager {
   }
 
   async readLogs(
-    processId: string, 
-    type: 'stdout' | 'stderr', 
+    processId: string,
+    type: 'stdout' | 'stderr',
     lines: number = 100
   ): Promise<string[]> {
     const logDir = this.configManager.getLogDirectory();
-    const pattern = `log_${processId}_*_${type}.log`;
-    
+
     try {
       const files = await fs.readdir(logDir);
-      const matchingFiles = files.filter(f => 
+      const matchingFiles = files.filter(f =>
         f.startsWith(`log_${processId}_`) && f.endsWith(`_${type}.log`)
       ).sort().reverse();
 
       const allLines: string[] = [];
-      
+
       for (const file of matchingFiles) {
         if (allLines.length >= lines) break;
-        
+
         const content = await fs.readFile(path.join(logDir, file), 'utf-8');
         const fileLines = content.split('\n').filter(line => line.trim() !== '');
         allLines.push(...fileLines);
@@ -107,11 +106,11 @@ export class LogManager {
 
   async clearLogs(processId: string): Promise<void> {
     const logDir = this.configManager.getLogDirectory();
-    
+
     try {
       const files = await fs.readdir(logDir);
       const matchingFiles = files.filter(f => f.startsWith(`log_${processId}_`));
-      
+
       for (const file of matchingFiles) {
         await fs.unlink(path.join(logDir, file));
       }
@@ -157,12 +156,12 @@ export class LogManager {
 
     try {
       const files = await fs.readdir(logDir);
-      
+
       for (const file of files) {
         if (file.startsWith('log_')) {
           const filePath = path.join(logDir, file);
           const stats = await fs.stat(filePath);
-          
+
           if (stats.mtime < cutoffDate) {
             await fs.unlink(filePath);
           }

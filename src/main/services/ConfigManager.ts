@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { AppConfig, AppSettings, MCPServerConfig, MCPServers } from '@shared/types';
-import { DEFAULT_CONFIG, getConfigPath } from '@shared/constants';
+import { AppConfig, AppSettings, MCPServerConfig, MCPServers } from '../../shared/types';
+import { DEFAULT_CONFIG, getConfigPath } from '../../shared/constants';
 
 export class ConfigManager {
   private config: AppConfig;
@@ -115,7 +115,7 @@ export class ConfigManager {
     if (this.config.mcpServers[newId]) {
       throw new Error(`Server with id '${newId}' already exists`);
     }
-    
+
     this.config.mcpServers[newId] = this.config.mcpServers[oldId];
     delete this.config.mcpServers[oldId];
     await this.saveConfig();

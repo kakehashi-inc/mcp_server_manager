@@ -28,7 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import ProcessDialog from '../components/ProcessDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { MCPServerConfig } from '@shared/types';
+import { MCPServerConfig } from '../../shared/types';
 
 interface ServerEdit {
   id: string;
@@ -170,7 +170,7 @@ const ProcessesPage: React.FC = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    {server.config.platform === 'wsl' 
+                    {server.config.platform === 'wsl'
                       ? `WSL (${server.config.wslDistribution})`
                       : t('process.platform.host')
                     }

@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { IPC_CHANNELS } from '@shared/types';
+import { IPC_CHANNELS } from '../../shared/types';
 import { ProcessManager } from '../services/ProcessManager';
 import { ConfigManager } from '../services/ConfigManager';
 import { LogManager } from '../services/LogManager';
