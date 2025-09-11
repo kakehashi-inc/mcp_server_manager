@@ -3,6 +3,7 @@ productName: MCP Server Manager
 directories:
   output: release
   buildResources: build
+artifactName: "mcpm-${os}-${arch}-${version}.${ext}"
 
 files:
   - dist/**/*
@@ -15,6 +16,22 @@ files:
   - "!**/node_modules/*.d.ts"
   - "!**/node_modules/.bin"
 
+win:
+  icon: public/icon.ico
+  executableName: mcpm
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+
+nsis:
+  shortcutName: MCP Server Manager
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+
 mac:
   category: public.app-category.developer-tools
   icon: public/icon.png
@@ -23,28 +40,27 @@ mac:
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   target:
-    - dmg
-    - zip
-
-win:
-  icon: public/icon.png
-  target:
-    - nsis
-    - portable
-
-nsis:
-  oneClick: false
-  perMachine: false
-  allowToChangeInstallationDirectory: true
-  deleteAppDataOnUninstall: false
+    - target: dmg
+      arch:
+        - x64
+        - arm64
 
 linux:
   icon: public/icon.png
   category: Development
   target:
-    - AppImage
-    - deb
-    - rpm
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+    - target: rpm
+      arch:
+        - x64
+        - arm64
   desktop:
     Name: MCP Server Manager
     Comment: Manage MCP server processes

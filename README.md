@@ -169,3 +169,9 @@ MCP Client標準形式に準拠した設定ファイル：
 - アプリ起動時にWSLの有無を検出します（`wsl.exe -l -v` を使用）
 - ディストリビューション一覧は名前・状態・バージョンを抽出し、既定のものは `(既定)` と表示
 - 表示が想定と異なる場合は `wsl.exe -l -v` の結果に依存します
+
+### Windows用アイコンの作成
+
+```exec
+magick public/icon.png -define icon:auto-resize=256,128,96,64,48,32,24,16 public/icon.ico
+```
