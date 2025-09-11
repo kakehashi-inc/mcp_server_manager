@@ -96,9 +96,10 @@ MIT
 
 ## 開発者向け情報
 
-### デバッグ
+### 実行モード
 
-開発モードでは自動的にDevToolsが開きます。`vite.config.ts` の `server.port` は `3001` 固定です。
+- 開発: `npm run dev`（Vite: http://localhost:3001, BrowserRouter）
+- 本番: `npm run build && npm run start`（HashRouter で `dist/renderer/index.html` を読み込み）
 
 ### データファイルの保存場所
 
@@ -111,9 +112,9 @@ MIT
 ```
 ~/.mcpm/
 ├── config.json      # 設定とMCPサーバー定義
-└── logs/           # ログファイル
-    ├── log_[server_id]_[date]_[hour]_stdout.log
-    └── log_[server_id]_[date]_[hour]_stderr.log
+└── logs/            # ログファイル
+    ├── {server_id}_YYYYMMDD_stdout.log
+    └── {server_id}_YYYYMMDD_stderr.log
 ```
 
 #### config.json の形式
@@ -163,3 +164,8 @@ MCP Client標準形式に準拠した設定ファイル：
 - **platform**: 実行環境 ("host" | "wsl")
 - **wslDistribution**: WSLディストリビューション名（WSL利用時）
 - **autoStart**: アプリ起動時の自動実行
+
+### WSL について（Windows）
+- アプリ起動時にWSLの有無を検出します（`wsl.exe -l -v` を使用）
+- ディストリビューション一覧は名前・状態・バージョンを抽出し、既定のものは `(既定)` と表示
+- 表示が想定と異なる場合は `wsl.exe -l -v` の結果に依存します

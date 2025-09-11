@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +43,23 @@ function App() {
         'Arial',
         'sans-serif',
       ].join(','),
+      fontSize: 14, // base 14px
+      // Title (page/app titles): 18px
+      h1: { fontSize: '1.286rem', fontWeight: 600, lineHeight: 1.4 },
+      h2: { fontSize: '1.286rem', fontWeight: 600, lineHeight: 1.4 },
+      h3: { fontSize: '1.286rem', fontWeight: 600, lineHeight: 1.4 },
+      h4: { fontSize: '1.286rem', fontWeight: 600, lineHeight: 1.4 },
+      // Section/Dialog titles: 16px
+      h5: { fontSize: '1.143rem', fontWeight: 600, lineHeight: 1.5 },
+      h6: { fontSize: '1.143rem', fontWeight: 600, lineHeight: 1.5 },
+      // Body/controls: 14px
+      body1: { fontSize: '1rem' },
+      subtitle1: { fontSize: '1rem' },
+      button: { fontSize: '1rem', textTransform: 'none' },
+      // Caption/secondary: 12px
+      body2: { fontSize: '0.857rem' },
+      subtitle2: { fontSize: '0.857rem' },
+      caption: { fontSize: '0.857rem' },
     },
   });
 
