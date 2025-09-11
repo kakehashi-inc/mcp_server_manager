@@ -55,7 +55,6 @@ export default {
         darkMode: 'ダークモード',
         logDirectory: 'ログディレクトリ',
         logRetentionDays: 'ログ保持日数',
-        wslLogDirectories: 'WSLログディレクトリ',
         save: '保存',
         saved: '設定を保存しました',
         browse: '参照',

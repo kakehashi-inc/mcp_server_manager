@@ -147,9 +147,6 @@ MCP Client標準形式に準拠した設定ファイル：
     "language": "ja",
     "darkMode": false,
     "logDirectory": "~/.mcpm/logs",
-    "wslLogDirectories": {
-      "Ubuntu": "~/.mcpm/logs"
-    },
     "logRetentionDays": 7
   }
 }

@@ -116,6 +116,23 @@ export class ProcessManager {
         }
 
         try {
+            // Guard: WSL指定だがWSLが利用不可
+            if ((config.platform || 'host') === 'wsl') {
+                const wslAvailable = await SystemUtils.isWSLAvailable();
+                if (!wslAvailable) {
+                    await this.logManager.createLogStream(id);
+                    await this.logManager.writeLog(id, 'stderr', 'WSL is not available on this system.');
+                    this.updateProcessStatus(id, { status: 'error', pid: undefined, startedAt: undefined });
+                    return false;
+                }
+                if (!config.wslDistribution) {
+                    await this.logManager.createLogStream(id);
+                    await this.logManager.writeLog(id, 'stderr', 'WSL distribution is not specified.');
+                    this.updateProcessStatus(id, { status: 'error', pid: undefined, startedAt: undefined });
+                    return false;
+                }
+            }
+
             const childProcess: ChildProcess = SystemUtils.spawnCommand(config.command, config.args, {
                 platform: config.platform || 'host',
                 wslDistribution: config.wslDistribution,
@@ -132,6 +149,21 @@ export class ProcessManager {
 
             childProcess.stderr?.on('data', async data => {
                 await this.logManager.writeLog(id, 'stderr', data.toString());
+            });
+
+            childProcess.on('error', async err => {
+                await this.logManager.writeLog(
+                    id,
+                    'stderr',
+                    `Process error: ${err instanceof Error ? err.message : String(err)}`
+                );
+                await this.logManager.closeLogStream(id);
+                this.runningProcesses.delete(id);
+                this.updateProcessStatus(id, {
+                    status: 'error',
+                    pid: undefined,
+                    startedAt: undefined,
+                });
             });
 
             childProcess.on('exit', async code => {

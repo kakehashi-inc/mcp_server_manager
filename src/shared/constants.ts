@@ -9,7 +9,6 @@ export const DEFAULT_CONFIG: AppConfig = {
         language: 'ja',
         darkMode: false,
         logDirectory: path.join(os.homedir(), '.mcpm', 'logs'),
-        wslLogDirectories: {},
         logRetentionDays: 7,
     },
 };

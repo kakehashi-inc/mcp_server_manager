@@ -48,29 +48,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Typography variant='h6' noWrap component='div' sx={{ flexGrow: 1 }}>
                         {t('app.title')}
                     </Typography>
-                    <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2 }}>
-                        <IconButton
-                            size='small'
-                            color={location.pathname.startsWith('/processes') ? 'inherit' : 'default'}
-                            onClick={() => navigate('/processes')}
-                        >
-                            <ProcessIcon />
-                        </IconButton>
-                        <IconButton
-                            size='small'
-                            color={location.pathname.startsWith('/logs') ? 'inherit' : 'default'}
-                            onClick={() => navigate('/logs')}
-                            sx={{ mx: 1 }}
-                        >
-                            <LogsIcon />
-                        </IconButton>
-                        <IconButton
-                            size='small'
-                            color={location.pathname.startsWith('/settings') ? 'inherit' : 'default'}
-                            onClick={() => navigate('/settings')}
-                        >
-                            <SettingsIcon />
-                        </IconButton>
+                    <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2, display: 'flex', gap: 1 }}>
+                        {[
+                            { path: '/processes', Icon: ProcessIcon, key: 'proc' },
+                            { path: '/logs', Icon: LogsIcon, key: 'logs' },
+                            { path: '/settings', Icon: SettingsIcon, key: 'settings' },
+                        ].map(({ path, Icon, key }) => {
+                            const active = location.pathname.startsWith(path);
+                            return (
+                                <Box
+                                    key={key}
+                                    sx={{
+                                        position: 'relative',
+                                        borderRadius: 1,
+                                        bgcolor: theme => (active ? theme.palette.action.selected : 'transparent'),
+                                        '&::after': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            left: 8,
+                                            right: 8,
+                                            bottom: -6,
+                                            height: 3,
+                                            borderRadius: 2,
+                                            bgcolor: theme => (active ? theme.palette.primary.main : 'transparent'),
+                                        },
+                                    }}
+                                >
+                                    <IconButton
+                                        size='small'
+                                        color={active ? 'inherit' : 'default'}
+                                        onClick={() => navigate(path)}
+                                    >
+                                        <Icon />
+                                    </IconButton>
+                                </Box>
+                            );
+                        })}
                     </Box>
                     {
                         <Box sx={{ WebkitAppRegion: 'no-drag' }}>

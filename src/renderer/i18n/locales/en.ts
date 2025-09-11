@@ -55,7 +55,6 @@ export default {
         darkMode: 'Dark Mode',
         logDirectory: 'Log Directory',
         logRetentionDays: 'Log Retention Days',
-        wslLogDirectories: 'WSL Log Directories',
         save: 'Save',
         saved: 'Settings saved',
         browse: 'Browse',

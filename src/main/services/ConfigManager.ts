@@ -118,10 +118,7 @@ export class ConfigManager {
     }
 
     // Utility methods
-    getLogDirectory(distribution?: string): string {
-        if (distribution && this.config.settings.wslLogDirectories[distribution]) {
-            return this.config.settings.wslLogDirectories[distribution];
-        }
+    getLogDirectory(): string {
         return this.config.settings.logDirectory;
     }
 }

@@ -36,17 +36,13 @@ const SettingsPage: React.FC = () => {
     useEffect(() => {
         if (settings) {
             setLocalSettings({ ...settings });
-            setWslLogDirs({ ...settings.wslLogDirectories });
         }
     }, [settings]);
 
     const handleSave = async () => {
         if (!localSettings) return;
 
-        const updatedSettings = {
-            ...localSettings,
-            wslLogDirectories: wslLogDirs,
-        };
+        const updatedSettings = { ...localSettings };
 
         await window.electronAPI.settingsAPI.update(updatedSettings);
         updateSettings(updatedSettings);
@@ -57,15 +53,6 @@ const SettingsPage: React.FC = () => {
         }
 
         setSaveSuccess(true);
-    };
-
-    // Directory browse button removed; users can input path directly
-
-    const handleWslLogDirChange = (distribution: string, value: string) => {
-        setWslLogDirs({
-            ...wslLogDirs,
-            [distribution]: value,
-        });
     };
 
     if (!localSettings) {
@@ -148,28 +135,6 @@ const SettingsPage: React.FC = () => {
                             endAdornment: t('settings.days'),
                         }}
                     />
-
-                    {wslDistributions.length > 0 && (
-                        <>
-                            <Divider sx={{ my: 1 }} />
-                            <Typography variant='subtitle1'>{t('settings.wslLogDirectories')}</Typography>
-                            <List>
-                                {wslDistributions.map(dist => (
-                                    <ListItem key={dist.name} sx={{ px: 0 }}>
-                                        <ListItemText primary={dist.name} secondary={dist.isDefault ? 'Default' : ''} />
-                                        <ListItemSecondaryAction sx={{ width: '50%' }}>
-                                            <TextField
-                                                value={wslLogDirs[dist.name] || '~/.mcpm/logs'}
-                                                onChange={e => handleWslLogDirChange(dist.name, e.target.value)}
-                                                size='small'
-                                                fullWidth
-                                            />
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </>
-                    )}
                 </Box>
             </Paper>
 

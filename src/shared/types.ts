@@ -37,7 +37,6 @@ export interface AppSettings {
     language: 'ja' | 'en';
     darkMode: boolean;
     logDirectory: string;
-    wslLogDirectories: Record<string, string>;
     logRetentionDays: number;
 }
 
