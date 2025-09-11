@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useStore from './store/useStore';
@@ -10,7 +10,8 @@ import LogsPage from './pages/LogsPage';
 
 function App() {
   const { i18n } = useTranslation();
-  const { settings, initialize } = useStore();
+  const settings = useStore((s) => s.config?.settings);
+  const initialize = useStore((s) => s.initialize);
 
   useEffect(() => {
     initialize();
@@ -48,16 +49,29 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Navigate to="/processes" replace />} />
-            <Route path="/processes" element={<ProcessesPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/logs/:processId?" element={<LogsPage />} />
-          </Routes>
-        </Layout>
-      </Router>
+      {(import.meta as any).env && (import.meta as any).env.DEV ? (
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Navigate to="/processes" replace />} />
+              <Route path="/processes" element={<ProcessesPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/logs/:processId?" element={<LogsPage />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      ) : (
+        <HashRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Navigate to="/processes" replace />} />
+              <Route path="/processes" element={<ProcessesPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/logs/:processId?" element={<LogsPage />} />
+            </Routes>
+          </Layout>
+        </HashRouter>
+      )}
     </ThemeProvider>
   );
 }

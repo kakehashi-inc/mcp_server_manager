@@ -45,6 +45,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!open) return;
     if (server) {
       setFormData({
         id: server.id,
@@ -71,7 +72,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
       });
     }
     setError(null);
-  }, [server, wslDistributions]);
+  }, [open, server, wslDistributions]);
 
   const handleSubmit = async () => {
     const args = formData.args

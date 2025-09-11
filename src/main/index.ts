@@ -1,5 +1,5 @@
 import 'module-alias/register';
-import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { initializeIPC } from './ipc';
@@ -8,7 +8,6 @@ import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
 
 let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
 let processManager: ProcessManager;
 let configManager: ConfigManager;
 let logManager: LogManager;
@@ -69,40 +68,6 @@ function createWindow() {
   }
 }
 
-function createTray() {
-  const pngPath = path.join(__dirname, '../../public/icon.png');
-  const svgPath = path.join(__dirname, '../../public/icon.svg');
-  let trayIcon: Electron.NativeImage | null = null;
-  if (fs.existsSync(pngPath)) {
-    trayIcon = nativeImage.createFromPath(pngPath);
-  } else if (fs.existsSync(svgPath)) {
-    trayIcon = nativeImage.createFromPath(svgPath);
-  }
-  tray = new Tray(trayIcon || nativeImage.createEmpty());
-
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show',
-      click: () => {
-        mainWindow?.show();
-      }
-    },
-    {
-      label: 'Quit',
-      click: () => {
-        app.quit();
-      }
-    }
-  ]);
-
-  tray.setToolTip('MCP Server Manager');
-  tray.setContextMenu(contextMenu);
-
-  tray.on('double-click', () => {
-    mainWindow?.show();
-  });
-}
-
 async function initializeServices() {
   // Initialize managers
   configManager = new ConfigManager();
@@ -127,7 +92,6 @@ async function initializeServices() {
 app.whenReady().then(async () => {
   await initializeServices();
   createWindow();
-  createTray();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -142,13 +106,21 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('before-quit', async () => {
-  // Stop all processes if needed
-  await processManager.stopAll();
-
-  // Clean up
-  processManager.stopMonitoring();
-  logManager.stopRotation();
+let isQuitting = false;
+app.on('before-quit', async (e) => {
+  if (isQuitting) return;
+  e.preventDefault();
+  try {
+    // Ensure all child processes are stopped before exiting
+    await processManager.stopAll();
+  } catch (err) {
+    // No-op; proceed to exit regardless
+  } finally {
+    processManager.stopMonitoring();
+    logManager.stopRotation();
+    isQuitting = true;
+    app.exit(0);
+  }
 });
 
 // Handle protocol for deep linking (optional)

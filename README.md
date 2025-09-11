@@ -35,7 +35,7 @@ cd mcp_server_manager
 # 依存関係のインストール
 npm install
 
-# 開発サーバーの起動
+# 開発起動
 npm run dev
 ```
 
@@ -98,7 +98,7 @@ MIT
 
 ### デバッグ
 
-開発モードでは自動的にDevToolsが開きます。
+開発モードでは自動的にDevToolsが開きます。`vite.config.ts` の `server.port` は `3001` 固定です。
 
 ### データファイルの保存場所
 

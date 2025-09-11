@@ -14,6 +14,10 @@ export class LogManager {
     this.logStreams = new Map();
   }
 
+  private escapeRegExp(input: string): string {
+    return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async initialize(): Promise<void> {
     await this.ensureLogDirectory();
   }
@@ -30,8 +34,7 @@ export class LogManager {
   private getLogFileName(processId: string, type: 'stdout' | 'stderr'): string {
     const date = new Date();
     const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
-    const hourStr = date.getHours().toString().padStart(2, '0');
-    return `log_${processId}_${dateStr}_${hourStr}_${type}.log`;
+    return `${processId}_${dateStr}_${type}.log`;
   }
 
   async createLogStream(processId: string): Promise<void> {
@@ -83,9 +86,12 @@ export class LogManager {
 
     try {
       const files = await fs.readdir(logDir);
-      const matchingFiles = files.filter(f =>
-        f.startsWith(`log_${processId}_`) && f.endsWith(`_${type}.log`)
-      ).sort().reverse();
+      const id = this.escapeRegExp(processId);
+      const pattern = new RegExp(`^(?:${id}|log_${id})_\\d{8}(?:_\\d{2})?_${type}\\.log$`);
+      const matchingFiles = files
+        .filter((f) => pattern.test(f))
+        .sort()
+        .reverse();
 
       const allLines: string[] = [];
 
@@ -109,7 +115,9 @@ export class LogManager {
 
     try {
       const files = await fs.readdir(logDir);
-      const matchingFiles = files.filter(f => f.startsWith(`log_${processId}_`));
+      const id = this.escapeRegExp(processId);
+      const pattern = new RegExp(`^(?:${id}|log_${id})_\\d{8}(?:_\\d{2})?_(?:stdout|stderr)\\.log$`);
+      const matchingFiles = files.filter((f) => pattern.test(f));
 
       for (const file of matchingFiles) {
         await fs.unlink(path.join(logDir, file));
@@ -157,14 +165,13 @@ export class LogManager {
     try {
       const files = await fs.readdir(logDir);
 
+      const pattern = new RegExp(`^(?:.*|log_.*)_\\d{8}(?:_\\d{2})?_(?:stdout|stderr)\\.log$`);
       for (const file of files) {
-        if (file.startsWith('log_')) {
-          const filePath = path.join(logDir, file);
-          const stats = await fs.stat(filePath);
-
-          if (stats.mtime < cutoffDate) {
-            await fs.unlink(filePath);
-          }
+        if (!pattern.test(file)) continue;
+        const filePath = path.join(logDir, file);
+        const stats = await fs.stat(filePath);
+        if (stats.mtime < cutoffDate) {
+          await fs.unlink(filePath);
         }
       }
     } catch (error) {
