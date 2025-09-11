@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as os from "os";
+import * as fs from "fs";
 import { SystemInfo, WSLDistribution } from "../../shared/types";
 
 const execAsync = promisify(exec);
@@ -37,29 +38,45 @@ export class SystemUtils {
         }
 
         try {
+            const parseVerbose = (text: string): WSLDistribution[] => {
+                const lines = text
+                    .split(/\r?\n/)
+                    .map((l) => l.trim())
+                    .filter((l) => l.length > 0)
+                    .filter((l) => !/^name\s+state\s+version/i.test(l));
+
+                const out: WSLDistribution[] = [];
+                for (const line of lines) {
+                    const isDefault = line.startsWith("*");
+                    const rest = isDefault ? line.slice(1).trim() : line;
+                    const cols = rest.split(/\s{2,}/);
+                    if (cols.length < 3) continue;
+                    const name = cols[0];
+                    const stateRaw = cols[1];
+                    const versionRaw = cols[2];
+                    if (!name) continue;
+                    const state = /running/i.test(stateRaw) ? "Running" : "Stopped";
+                    const version = parseInt(versionRaw) || 2;
+                    out.push({ name, version, isDefault, state });
+                }
+                return out;
+            };
+
+            // Try verbose first
             const { stdout } = await execAsync("wsl.exe -l -v");
-            const lines = stdout
-                .split(/\r?\n/)
-                .map((l) => l.trimEnd())
-                .filter((l) => l.trim().length > 0)
-                .filter((l) => !/^name\s+state\s+version/i.test(l)); // drop header
+            let dists = parseVerbose(stdout);
 
-            const distributions: WSLDistribution[] = [];
-            const rowRegex = /^\s*(\*)?\s*(.+?)\s{2,}(\S+)\s{2,}(\d+)\s*$/;
-
-            for (const line of lines) {
-                const m = line.match(rowRegex);
-                if (!m) continue;
-                const isDefault = !!m[1];
-                const name = m[2];
-                const stateRaw = m[3];
-                const versionRaw = m[4];
-                const state = /running/i.test(stateRaw) || /実行/.test(stateRaw) ? "Running" : "Stopped";
-                const version = parseInt(versionRaw) || 2;
-                distributions.push({ name, version, isDefault, state });
+            // Fallback to quiet list if nothing parsed
+            if (dists.length === 0) {
+                const { stdout: qout } = await execAsync("wsl.exe -l -q");
+                dists = qout
+                    .split(/\r?\n/)
+                    .map((l) => l.trim())
+                    .filter((l) => l.length > 0)
+                    .map<WSLDistribution>((name) => ({ name, version: 2, isDefault: false, state: "Stopped" }));
             }
 
-            return distributions;
+            return dists;
         } catch (error) {
             console.error("Failed to get WSL distributions:", error);
             return [];
@@ -81,8 +98,9 @@ export class SystemUtils {
         try {
             const { stdout, stderr } = await execAsync(fullCommand);
             return { stdout, stderr };
-        } catch (error: any) {
-            return { stdout: "", stderr: error.message || "Unknown error" };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            return { stdout: "", stderr: message };
         }
     }
 
@@ -105,7 +123,7 @@ export class SystemUtils {
         }
 
         try {
-            const osRelease = require("fs").readFileSync("/etc/os-release", "utf8");
+            const osRelease = fs.readFileSync("/etc/os-release", "utf8");
 
             if (type === "ubuntu") {
                 return osRelease.includes("Ubuntu") || osRelease.includes("Debian");

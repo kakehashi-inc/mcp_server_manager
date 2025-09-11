@@ -15,16 +15,12 @@ import {
   Divider,
   Alert,
   Snackbar,
-  IconButton,
   List,
   ListItem,
   ListItemText,
   ListItemSecondaryAction
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  FolderOpen as FolderIcon
-} from '@mui/icons-material';
+import { Save as SaveIcon } from '@mui/icons-material';
 import useStore from '../store/useStore';
 import { AppSettings } from '../../shared/types';
 
@@ -63,11 +59,7 @@ const SettingsPage: React.FC = () => {
     setSaveSuccess(true);
   };
 
-  const handleBrowseLogDirectory = async () => {
-    // Note: Electron dialog API needs to be implemented in main process
-    // For now, just allow manual text input
-    console.log('Browse directory not implemented yet');
-  };
+  // Directory browse button removed; users can input path directly
 
   const handleWslLogDirChange = (distribution: string, value: string) => {
     setWslLogDirs({
@@ -132,17 +124,12 @@ const SettingsPage: React.FC = () => {
         </Typography>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <TextField
-              label={t('settings.logDirectory')}
-              value={localSettings.logDirectory}
-              onChange={(e) => setLocalSettings({ ...localSettings, logDirectory: e.target.value })}
-              fullWidth
-            />
-            <IconButton onClick={handleBrowseLogDirectory}>
-              <FolderIcon />
-            </IconButton>
-          </Box>
+          <TextField
+            label={t('settings.logDirectory')}
+            value={localSettings.logDirectory}
+            onChange={(e) => setLocalSettings({ ...localSettings, logDirectory: e.target.value })}
+            fullWidth
+          />
 
           <TextField
             label={t('settings.logRetentionDays')}

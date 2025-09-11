@@ -66,7 +66,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {(import.meta as any).env && (import.meta as any).env.DEV ? (
+      {import.meta.env.DEV ? (
         <BrowserRouter>
           <Layout>
             <Routes>
