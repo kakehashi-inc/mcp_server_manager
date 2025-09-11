@@ -41,14 +41,14 @@ if (!fs.existsSync(entitlementsPath)) {
   <true/>
 </dict>
 </plist>`;
-  
+
   fs.writeFileSync(entitlementsPath, entitlements);
   console.log('Created macOS entitlements file');
 }
 
 console.log('\nSetup complete!');
 console.log('\nNext steps:');
-console.log('1. Run "npm install" to install dependencies');
+console.log('1. Run "yarn install" to install dependencies');
 console.log('2. Add a 512x512 PNG icon to public/icon.png');
-console.log('3. Run "npm run dev" to start development');
-console.log('4. Run "npm run dist" to build the application');
+console.log('3. Run "yarn dev" to start development');
+console.log('4. Run "yarn dist" to build the application');

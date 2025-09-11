@@ -21,8 +21,8 @@ MCPサーバープロセスを管理するためのElectronベースのGUIアプ
 
 ### 必要要件
 
-- Node.js 18.x以上
-- npm または yarn
+- Node.js 22.x以上
+- yarn 4
 - Git
 
 ### インストール
@@ -33,29 +33,29 @@ git clone <repository-url>
 cd mcp_server_manager
 
 # 依存関係のインストール
-npm install
+yarn install
 
 # 開発起動
-npm run dev
+yarn dev
 ```
 
 ## ビルド
 
 ### 全プラットフォーム向けビルド
 ```bash
-npm run dist
+yarn dist
 ```
 
 ### プラットフォーム別ビルド
 ```bash
 # Windows
-npm run dist:win
+yarn dist:win
 
 # macOS
-npm run dist:mac
+yarn dist:mac
 
 # Linux
-npm run dist:linux
+yarn dist:linux
 ```
 
 ## プロジェクト構造
@@ -98,8 +98,8 @@ MIT
 
 ### 実行モード
 
-- 開発: `npm run dev`（Vite: http://localhost:3001, BrowserRouter）
-- 本番: `npm run build && npm run start`（HashRouter で `dist/renderer/index.html` を読み込み）
+- 開発: `yarn dev`（Vite: http://localhost:3001, BrowserRouter）
+- 本番: `yarn build && yarn start`（HashRouter で `dist/renderer/index.html` を読み込み）
 
 ### データファイルの保存場所
 

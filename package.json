@@ -3,23 +3,35 @@
   "version": "1.0.0",
   "description": "MCP Server Process Manager GUI",
   "main": "dist/main/index.js",
+  "engines": {
+    "node": ">=22.0.0",
+    "yarn": ">=4.0.0",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn"
+  },
   "scripts": {
     "setup": "node scripts/setup.js",
-    "dev": "concurrently -k -r \"npm:dev:main\" \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev": "concurrently -k -r \"yarn run dev:main\" \"yarn run dev:renderer\" \"yarn run dev:electron\"",
     "dev:main": "tsc -w -p tsconfig.main.json",
     "dev:renderer": "vite",
-    "dev:electron": "wait-on http://localhost:3001 && electron . --dev",
+    "dev:electron": "wait-on dist/main/index.js http://localhost:3001 && electron . --dev",
     "build": "tsc -p tsconfig.main.json && vite build",
     "start": "electron .",
-    "dist": "npm run build && electron-builder",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:linux": "npm run build && electron-builder --linux"
+    "dist": "yarn build && electron-builder",
+    "dist:win": "yarn build && electron-builder --win",
+    "dist:mac": "yarn build && electron-builder --mac",
+    "dist:linux": "yarn build && electron-builder --linux"
   },
-  "keywords": ["mcp", "server", "process", "manager"],
+  "keywords": [
+    "mcp",
+    "server",
+    "process",
+    "manager"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
@@ -37,8 +49,7 @@
     "vite": "^5.0.11",
     "vite-plugin-electron": "^0.15.5",
     "vite-plugin-electron-renderer": "^0.14.5",
-    "wait-on": "^7.0.1",
-    "@types/module-alias": "^2.0.4"
+    "wait-on": "^7.0.1"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
@@ -47,6 +58,7 @@
     "@mui/material": "^5.15.4",
     "electron-store": "^8.1.0",
     "i18next": "^23.7.16",
+    "module-alias": "^2.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^14.0.0",
@@ -54,8 +66,7 @@
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",
-    "zustand": "^4.4.7",
-    "module-alias": "^2.2.3"
+    "zustand": "^4.4.7"
   },
   "_moduleAliases": {
     "@main": "dist/main",
@@ -79,7 +90,11 @@
       "target": "nsis"
     },
     "linux": {
-      "target": ["AppImage", "deb", "rpm"],
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
       "category": "Development"
     }
   }
