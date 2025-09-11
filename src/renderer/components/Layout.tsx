@@ -1,15 +1,15 @@
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { Box, AppBar, Toolbar, Typography, IconButton } from "@mui/material";
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import {
     Memory as ProcessIcon,
     Settings as SettingsIcon,
     Description as LogsIcon,
     Minimize as MinimizeIcon,
-    Maximize as MaximizeIcon,
+    CropSquare as MaximizeIcon,
     Close as CloseIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
 const appBarHeight = 64;
 
@@ -35,52 +35,52 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     return (
-        <Box sx={{ display: "flex", height: "100vh" }}>
+        <Box sx={{ display: 'flex', height: '100vh' }}>
             <AppBar
-                position="fixed"
+                position='fixed'
                 sx={{
-                    width: "100%",
+                    width: '100%',
                     ml: 0,
-                    WebkitAppRegion: "drag",
+                    WebkitAppRegion: 'drag',
                 }}
             >
                 <Toolbar>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-                        {t("app.title")}
+                    <Typography variant='h6' noWrap component='div' sx={{ flexGrow: 1 }}>
+                        {t('app.title')}
                     </Typography>
-                    <Box sx={{ WebkitAppRegion: "no-drag", mr: 2 }}>
+                    <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2 }}>
                         <IconButton
-                            size="small"
-                            color={location.pathname.startsWith("/processes") ? "inherit" : "default"}
-                            onClick={() => navigate("/processes")}
+                            size='small'
+                            color={location.pathname.startsWith('/processes') ? 'inherit' : 'default'}
+                            onClick={() => navigate('/processes')}
                         >
                             <ProcessIcon />
                         </IconButton>
                         <IconButton
-                            size="small"
-                            color={location.pathname.startsWith("/logs") ? "inherit" : "default"}
-                            onClick={() => navigate("/logs")}
+                            size='small'
+                            color={location.pathname.startsWith('/logs') ? 'inherit' : 'default'}
+                            onClick={() => navigate('/logs')}
                             sx={{ mx: 1 }}
                         >
                             <LogsIcon />
                         </IconButton>
                         <IconButton
-                            size="small"
-                            color={location.pathname.startsWith("/settings") ? "inherit" : "default"}
-                            onClick={() => navigate("/settings")}
+                            size='small'
+                            color={location.pathname.startsWith('/settings') ? 'inherit' : 'default'}
+                            onClick={() => navigate('/settings')}
                         >
                             <SettingsIcon />
                         </IconButton>
                     </Box>
                     {
-                        <Box sx={{ WebkitAppRegion: "no-drag" }}>
-                            <IconButton size="small" edge="end" color="inherit" onClick={handleMinimize}>
+                        <Box sx={{ WebkitAppRegion: 'no-drag' }}>
+                            <IconButton size='small' edge='end' color='inherit' onClick={handleMinimize}>
                                 <MinimizeIcon />
                             </IconButton>
-                            <IconButton size="small" edge="end" color="inherit" onClick={handleMaximize} sx={{ mx: 1 }}>
+                            <IconButton size='small' edge='end' color='inherit' onClick={handleMaximize} sx={{ mx: 1 }}>
                                 <MaximizeIcon />
                             </IconButton>
-                            <IconButton size="small" edge="end" color="inherit" onClick={handleClose}>
+                            <IconButton size='small' edge='end' color='inherit' onClick={handleClose}>
                                 <CloseIcon />
                             </IconButton>
                         </Box>
@@ -88,14 +88,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Toolbar>
             </AppBar>
             <Box
-                component="main"
+                component='main'
                 sx={{
                     flexGrow: 1,
-                    bgcolor: "background.default",
+                    bgcolor: 'background.default',
                     p: 3,
-                    width: "100%",
+                    width: '100%',
                     height: `calc(100vh - ${appBarHeight}px)`,
-                    overflow: "auto",
+                    overflow: 'auto',
                     mt: `${appBarHeight}px`,
                 }}
             >

@@ -3,18 +3,16 @@ import { initReactI18next } from 'react-i18next';
 import jaTranslations from './locales/ja';
 import enTranslations from './locales/en';
 
-i18n
-  .use(initReactI18next)
-  .init({
+i18n.use(initReactI18next).init({
     resources: {
-      ja: { translation: jaTranslations },
-      en: { translation: enTranslations }
+        ja: { translation: jaTranslations },
+        en: { translation: enTranslations },
     },
     lng: 'ja',
     fallbackLng: 'ja',
     interpolation: {
-      escapeValue: false
-    }
-  });
+        escapeValue: false,
+    },
+});
 
 export default i18n;

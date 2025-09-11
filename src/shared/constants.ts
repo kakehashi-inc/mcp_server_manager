@@ -4,14 +4,14 @@ import * as os from 'os';
 
 // Default Configuration
 export const DEFAULT_CONFIG: AppConfig = {
-  mcpServers: {},
-  settings: {
-    language: 'ja',
-    darkMode: false,
-    logDirectory: path.join(os.homedir(), '.mcpm', 'logs'),
-    wslLogDirectories: {},
-    logRetentionDays: 7
-  }
+    mcpServers: {},
+    settings: {
+        language: 'ja',
+        darkMode: false,
+        logDirectory: path.join(os.homedir(), '.mcpm', 'logs'),
+        wslLogDirectories: {},
+        logRetentionDays: 7,
+    },
 };
 
 // App Constants
@@ -26,16 +26,16 @@ export const LOG_ROTATION_INTERVAL = 3600000; // 1 hour
 
 // Supported Languages
 export const SUPPORTED_LANGUAGES = [
-  { code: 'ja', name: '日本語' },
-  { code: 'en', name: 'English' }
+    { code: 'ja', name: '日本語' },
+    { code: 'en', name: 'English' },
 ] as const;
 
 // File Paths
 export const getAppDataPath = () => {
-  // All settings are stored in ~/.mcpm directory
-  return path.join(os.homedir(), '.mcpm');
+    // All settings are stored in ~/.mcpm directory
+    return path.join(os.homedir(), '.mcpm');
 };
 
 export const getConfigPath = () => {
-  return path.join(getAppDataPath(), 'config.json');
+    return path.join(getAppDataPath(), 'config.json');
 };

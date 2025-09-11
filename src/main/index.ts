@@ -15,112 +15,112 @@ let logManager: LogManager;
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 800,
-    minHeight: 600,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      sandbox: false,
-      preload: path.join(__dirname, '../preload/index.js')
-    },
-    frame: false,
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    icon: ((): string | undefined => {
-      const pngPath = path.join(__dirname, '../../public/icon.png');
-      const svgPath = path.join(__dirname, '../../public/icon.svg');
-      if (fs.existsSync(pngPath)) return pngPath;
-      if (fs.existsSync(svgPath)) return svgPath;
-      return undefined;
-    })()
-  });
-
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3001');
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-  }
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-
-  // Custom title bar handlers for Windows/Linux
-  if (process.platform !== 'darwin') {
-    ipcMain.on('app:minimize', () => {
-      mainWindow?.minimize();
+    mainWindow = new BrowserWindow({
+        width: 1200,
+        height: 800,
+        minWidth: 800,
+        minHeight: 600,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: false,
+            preload: path.join(__dirname, '../preload/index.js'),
+        },
+        frame: false,
+        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+        icon: ((): string | undefined => {
+            const pngPath = path.join(__dirname, '../../public/icon.png');
+            const svgPath = path.join(__dirname, '../../public/icon.svg');
+            if (fs.existsSync(pngPath)) return pngPath;
+            if (fs.existsSync(svgPath)) return svgPath;
+            return undefined;
+        })(),
     });
 
-    ipcMain.on('app:maximize', () => {
-      if (mainWindow?.isMaximized()) {
-        mainWindow.restore();
-      } else {
-        mainWindow?.maximize();
-      }
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:3001');
+        mainWindow.webContents.openDevTools();
+    } else {
+        mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    }
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
     });
 
-    ipcMain.on('app:quit', () => {
-      app.quit();
-    });
-  }
+    // Custom title bar handlers for Windows/Linux
+    if (process.platform !== 'darwin') {
+        ipcMain.on('app:minimize', () => {
+            mainWindow?.minimize();
+        });
+
+        ipcMain.on('app:maximize', () => {
+            if (mainWindow?.isMaximized()) {
+                mainWindow.restore();
+            } else {
+                mainWindow?.maximize();
+            }
+        });
+
+        ipcMain.on('app:quit', () => {
+            app.quit();
+        });
+    }
 }
 
 async function initializeServices() {
-  // Initialize managers
-  configManager = new ConfigManager();
-  await configManager.initialize();
+    // Initialize managers
+    configManager = new ConfigManager();
+    await configManager.initialize();
 
-  logManager = new LogManager(configManager);
-  await logManager.initialize();
+    logManager = new LogManager(configManager);
+    await logManager.initialize();
 
-  processManager = new ProcessManager(logManager, configManager);
-  await processManager.initialize();
+    processManager = new ProcessManager(logManager, configManager);
+    await processManager.initialize();
 
-  // Initialize IPC handlers
-  initializeIPC(processManager, configManager, logManager);
+    // Initialize IPC handlers
+    initializeIPC(processManager, configManager, logManager);
 
-  // Start process monitoring
-  processManager.startMonitoring();
+    // Start process monitoring
+    processManager.startMonitoring();
 
-  // Start log rotation
-  logManager.startRotation();
+    // Start log rotation
+    logManager.startRotation();
 }
 
 app.whenReady().then(async () => {
-  await initializeServices();
-  createWindow();
+    await initializeServices();
+    createWindow();
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 let isQuitting = false;
-app.on('before-quit', async (e) => {
-  if (isQuitting) return;
-  e.preventDefault();
-  try {
-    // Ensure all child processes are stopped before exiting
-    await processManager.stopAll();
-  } catch (err) {
-    // No-op; proceed to exit regardless
-  } finally {
-    processManager.stopMonitoring();
-    logManager.stopRotation();
-    isQuitting = true;
-    app.exit(0);
-  }
+app.on('before-quit', async e => {
+    if (isQuitting) return;
+    e.preventDefault();
+    try {
+        // Ensure all child processes are stopped before exiting
+        await processManager.stopAll();
+    } catch (err) {
+        // No-op; proceed to exit regardless
+    } finally {
+        processManager.stopMonitoring();
+        logManager.stopRotation();
+        isQuitting = true;
+        app.exit(0);
+    }
 });
 
 // Handle protocol for deep linking (optional)
