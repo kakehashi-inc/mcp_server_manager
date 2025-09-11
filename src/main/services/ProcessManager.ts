@@ -4,6 +4,7 @@ import { PROCESS_CHECK_INTERVAL } from '../../shared/constants';
 import { LogManager } from './LogManager';
 import { ConfigManager } from './ConfigManager';
 import { BrowserWindow } from 'electron';
+import { SystemUtils } from '../utils/SystemUtils';
 
 export class ProcessManager {
     private runningProcesses: Map<string, ChildProcess>;
@@ -115,31 +116,12 @@ export class ProcessManager {
         }
 
         try {
-            let childProcess: ChildProcess;
-
-            if (config.platform === 'wsl' && config.wslDistribution) {
-                // Execute in WSL
-                const wslCommand = `wsl -d ${config.wslDistribution}`;
-                const envStr = Object.entries(config.env || {})
-                    .map(([key, value]) => `${key}="${value}"`)
-                    .join(' ');
-
-                childProcess = spawn(
-                    wslCommand,
-                    ['-e', 'bash', '-c', `${envStr} ${config.command} ${config.args.join(' ')}`],
-                    {
-                        shell: true,
-                        windowsHide: true,
-                    }
-                );
-            } else {
-                // Execute on host
-                childProcess = spawn(config.command, config.args, {
-                    env: { ...process.env, ...config.env },
-                    shell: true,
-                    windowsHide: true,
-                });
-            }
+            const childProcess: ChildProcess = SystemUtils.spawnCommand(config.command, config.args, {
+                platform: config.platform || 'host',
+                wslDistribution: config.wslDistribution,
+                env: config.env,
+                windowsHide: true,
+            });
 
             // Set up log streams
             await this.logManager.createLogStream(id);

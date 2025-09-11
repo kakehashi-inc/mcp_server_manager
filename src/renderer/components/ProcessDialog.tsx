@@ -73,7 +73,11 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
     }, [open, server, wslDistributions]);
 
     const handleSubmit = async () => {
-        const args = formData.args.split('\n').filter(arg => arg.trim() !== '');
+        const args = formData.args
+            .replace(/\r/g, '')
+            .split('\n')
+            .map(arg => arg.trim())
+            .filter(arg => arg.length > 0);
 
         const env: Record<string, string> = {};
         formData.env.split('\n').forEach(line => {

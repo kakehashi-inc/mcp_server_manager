@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
 import * as os from 'os';
 import * as fs from 'fs';
@@ -111,19 +111,12 @@ export class SystemUtils {
         args: string[] = [],
         env: Record<string, string> = {}
     ): Promise<{ stdout: string; stderr: string }> {
-        const envStr = Object.entries(env)
-            .map(([key, value]) => `${key}="${value}"`)
-            .join(' ');
-
-        const fullCommand = `wsl -d ${distribution} ${envStr} ${command} ${args.join(' ')}`;
-
-        try {
-            const { stdout, stderr } = await execAsync(fullCommand);
-            return { stdout, stderr };
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            return { stdout: '', stderr: message };
-        }
+        const result = await SystemUtils.execCommand(command, args, {
+            platform: 'wsl',
+            wslDistribution: distribution,
+            env,
+        });
+        return { stdout: result.stdout, stderr: result.stderr };
     }
 
     static getPlatformName(): string {
@@ -163,5 +156,90 @@ export class SystemUtils {
         }
 
         return false;
+    }
+
+    // Unified command execution utilities
+    static spawnCommand(
+        command: string,
+        args: string[] = [],
+        options: {
+            platform?: 'host' | 'wsl';
+            wslDistribution?: string;
+            env?: Record<string, string>;
+            cwd?: string;
+            windowsHide?: boolean;
+        } = {}
+    ): ChildProcess {
+        const platform = options.platform || 'host';
+        const windowsHide = options.windowsHide !== undefined ? options.windowsHide : true;
+
+        if (platform === 'wsl') {
+            if (!options.wslDistribution) {
+                throw new Error('WSL distribution is required for platform "wsl"');
+            }
+
+            const escapeSh = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
+            const envParts = Object.entries(options.env || {}).map(([key, value]) => `${key}=${escapeSh(value)}`);
+            const argsStr = (args || []).map(a => escapeSh(a)).join(' ');
+            const bashCommand = [envParts.join(' '), command, argsStr]
+                .filter(part => part && part.length > 0)
+                .join(' ')
+                .trim();
+
+            return spawn('wsl.exe', ['-d', options.wslDistribution, '--', 'bash', '-lc', bashCommand], {
+                cwd: options.cwd,
+                windowsHide,
+                shell: false,
+            });
+        }
+
+        // host
+        return spawn(command, args, {
+            cwd: options.cwd,
+            windowsHide,
+            shell: false,
+            env: { ...process.env, ...(options.env || {}) },
+        });
+    }
+
+    static execCommand(
+        command: string,
+        args: string[] = [],
+        options: {
+            platform?: 'host' | 'wsl';
+            wslDistribution?: string;
+            env?: Record<string, string>;
+            cwd?: string;
+            windowsHide?: boolean;
+        } = {}
+    ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+        return new Promise((resolve, reject) => {
+            let stdout = '';
+            let stderr = '';
+
+            let child: ChildProcess;
+            try {
+                child = SystemUtils.spawnCommand(command, args, options);
+            } catch (e) {
+                reject(e);
+                return;
+            }
+
+            child.stdout?.on('data', chunk => {
+                stdout += chunk.toString();
+            });
+
+            child.stderr?.on('data', chunk => {
+                stderr += chunk.toString();
+            });
+
+            child.on('error', err => {
+                reject(err);
+            });
+
+            child.on('close', code => {
+                resolve({ stdout, stderr, exitCode: code ?? -1 });
+            });
+        });
     }
 }
