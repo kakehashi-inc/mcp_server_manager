@@ -201,13 +201,22 @@ export class ProcessManager {
                     return false;
                 }
 
-                // Ensure process-specific data directory exists under app data path
-                const baseDir = getAppDataPath();
-                const dataDir = path.join(baseDir, 'mcp-auth-proxy', id);
-                try {
-                    await fs.mkdir(dataDir, { recursive: true });
-                } catch {
-                    //
+                // Decide data-path and ensure directory
+                const isWSLPlatform = (config.platform || 'host') === 'wsl';
+                let dataPathForProxy = '';
+                if (isWSLPlatform) {
+                    // Use WSL home
+                    dataPathForProxy = `~/mcp-auth-proxy/${id}`;
+                } else {
+                    // Host app data
+                    const baseDir = getAppDataPath();
+                    const dataDir = path.join(baseDir, 'mcp-auth-proxy', id);
+                    try {
+                        await fs.mkdir(dataDir, { recursive: true });
+                    } catch {
+                        // ignore
+                    }
+                    dataPathForProxy = dataDir;
                 }
 
                 const proxyArgs: string[] = [
@@ -217,7 +226,7 @@ export class ProcessManager {
                     '--listen',
                     `:${config.authProxyListenPort}`,
                     '--data-path',
-                    dataDir,
+                    dataPathForProxy,
                     '--oidc-provider-name',
                     String(oidcProviderName),
                     '--oidc-configuration-url',
@@ -240,7 +249,8 @@ export class ProcessManager {
                 proxyArgs.push(config.command);
                 proxyArgs.push(...runArgs);
 
-                runCommand = authProxyBin;
+                // For WSL, ensure directory exists inside WSL before launching
+                runCommand = isWSLPlatform ? `mkdir -p ${dataPathForProxy} && ${authProxyBin}` : authProxyBin;
                 runArgs = proxyArgs;
             }
 
