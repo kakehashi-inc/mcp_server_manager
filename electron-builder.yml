@@ -62,9 +62,10 @@ linux:
         - x64
         - arm64
   desktop:
-    Name: MCP Server Manager
-    Comment: Manage MCP server processes
-    Categories: Development
+    entry:
+      Name: MCP Server Manager
+      Comment: Manage MCP server processes
+      Categories: Development;
 
 publish:
   provider: github
