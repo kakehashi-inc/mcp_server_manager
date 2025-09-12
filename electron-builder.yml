@@ -67,6 +67,8 @@ linux:
       Comment: Manage MCP server processes
       Categories: Development;
 
-publish:
-  provider: github
-  releaseType: release
+#publish:
+#  provider: github
+#  releaseType: release
+
+publish: null
