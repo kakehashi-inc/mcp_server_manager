@@ -5,11 +5,13 @@ import { initializeIPC } from './ipc';
 import { ProcessManager } from './services/ProcessManager';
 import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
+import { NgrokMultiTunnelManager } from './services/NgrokMultiTunnelManager';
 
 let mainWindow: BrowserWindow | null = null;
 let processManager: ProcessManager;
 let configManager: ConfigManager;
 let logManager: LogManager;
+let ngrokManager: NgrokMultiTunnelManager;
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
@@ -78,8 +80,21 @@ async function initializeServices() {
     processManager = new ProcessManager(logManager, configManager);
     await processManager.initialize();
 
+    // Ngrok manager (independent from process manager)
+    ngrokManager = new NgrokMultiTunnelManager(configManager);
+
     // Initialize IPC handlers
-    initializeIPC(processManager, configManager, logManager);
+    initializeIPC(processManager, configManager, logManager, ngrokManager);
+
+    // Optional auto-start ngrok based on settings
+    try {
+        const settings = configManager.getSettings();
+        if (settings.ngrokAutoStart) {
+            await ngrokManager.start();
+        }
+    } catch (e) {
+        // Ignore failures at startup; user can start from UI
+    }
 
     // Start process monitoring
     processManager.startMonitoring();

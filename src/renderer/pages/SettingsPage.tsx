@@ -12,13 +12,8 @@ import {
     Select,
     MenuItem,
     Switch,
-    Divider,
     Alert,
     Snackbar,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction,
 } from '@mui/material';
 import { Save as SaveIcon } from '@mui/icons-material';
 import useStore from '../store/useStore';
@@ -27,11 +22,9 @@ import { AppSettings } from '../../shared/types';
 const SettingsPage: React.FC = () => {
     const { t, i18n } = useTranslation();
     const settings = useStore(s => s.config?.settings);
-    const wslDistributions = useStore(s => s.wslDistributions);
     const updateSettings = useStore(s => s.updateSettings);
     const [localSettings, setLocalSettings] = useState<AppSettings | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    const [wslLogDirs, setWslLogDirs] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (settings) {
@@ -164,6 +157,46 @@ const SettingsPage: React.FC = () => {
                         }
                         InputProps={{ inputProps: { min: 0, step: 1000 } }}
                         fullWidth
+                    />
+                </Box>
+            </Paper>
+
+            <Paper sx={{ p: 3, mb: 3 }}>
+                <Typography variant='h6' sx={{ mb: 2 }}>
+                    {t('settings.ngrok')}
+                </Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                        label={t('settings.ngrokAuthToken')}
+                        value={localSettings.ngrokAuthToken || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, ngrokAuthToken: e.target.value })}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.ngrokMetadataName')}
+                        value={localSettings.ngrokMetadataName || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, ngrokMetadataName: e.target.value })}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.ngrokPorts')}
+                        value={localSettings.ngrokPorts || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, ngrokPorts: e.target.value })}
+                        fullWidth
+                        helperText={t('settings.ngrokPorts')}
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={!!localSettings.ngrokAutoStart}
+                                onChange={e => setLocalSettings({ ...localSettings, ngrokAutoStart: e.target.checked })}
+                            />
+                        }
+                        label={t('settings.ngrokAutoStart')}
                     />
                 </Box>
             </Paper>

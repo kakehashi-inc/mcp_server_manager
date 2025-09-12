@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2, display: 'flex', gap: 1 }}>
                         {[
                             { path: '/processes', Icon: ProcessIcon, key: 'proc' },
-                            { path: '/logs', Icon: LogsIcon, key: 'logs' },
+                            { path: '/ngrok', Icon: LogsIcon, key: 'ngrok' },
                             { path: '/settings', Icon: SettingsIcon, key: 'settings' },
                         ].map(({ path, Icon, key }) => {
                             const active = location.pathname.startsWith(path);

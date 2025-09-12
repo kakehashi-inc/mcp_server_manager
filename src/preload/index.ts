@@ -21,6 +21,10 @@ const IPC_CHANNELS = {
     APP_QUIT: 'app:quit',
     APP_MINIMIZE: 'app:minimize',
     APP_MAXIMIZE: 'app:maximize',
+    NGROK_START: 'ngrok:start',
+    NGROK_STOP: 'ngrok:stop',
+    NGROK_STATUS: 'ngrok:status',
+    NGROK_LOG_READ: 'ngrok:log:read',
 } as const;
 
 // Expose protected methods that allow the renderer process to use
@@ -70,6 +74,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
         getInfo: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_INFO),
     },
 
+    // Ngrok
+    ngrokAPI: {
+        start: () => ipcRenderer.invoke(IPC_CHANNELS.NGROK_START),
+        stop: () => ipcRenderer.invoke(IPC_CHANNELS.NGROK_STOP),
+        status: () => ipcRenderer.invoke(IPC_CHANNELS.NGROK_STATUS),
+        readLogs: (lines?: number) => ipcRenderer.invoke(IPC_CHANNELS.NGROK_LOG_READ, lines),
+    },
+
     // Window controls
     windowAPI: {
         minimize: () => ipcRenderer.send(IPC_CHANNELS.APP_MINIMIZE),
@@ -110,6 +122,12 @@ declare global {
             };
             systemAPI: {
                 getInfo: () => Promise<any>;
+            };
+            ngrokAPI: {
+                start: () => Promise<any[]>;
+                stop: () => Promise<boolean>;
+                status: () => Promise<any[]>;
+                readLogs: (lines?: number) => Promise<string[]>;
             };
             windowAPI: {
                 minimize: () => void;

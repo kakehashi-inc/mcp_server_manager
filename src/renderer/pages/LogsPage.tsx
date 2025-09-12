@@ -1,40 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Box, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, IconButton } from '@mui/material';
 import {
-    Box,
-    Paper,
-    Typography,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    ToggleButton,
-    ToggleButtonGroup,
-    TextField,
-    IconButton,
-} from '@mui/material';
-import { Refresh as RefreshIcon, Clear as ClearIcon, ContentCopy as CopyIcon } from '@mui/icons-material';
+    Refresh as RefreshIcon,
+    Clear as ClearIcon,
+    ContentCopy as CopyIcon,
+    ArrowBack as ArrowBackIcon,
+} from '@mui/icons-material';
 import useStore from '../store/useStore';
 
 const LogsPage: React.FC = () => {
     const { t } = useTranslation();
     const { processId } = useParams();
+    const navigate = useNavigate();
     const { servers } = useStore();
 
     const [selectedProcessId, setSelectedProcessId] = useState<string>(processId || '');
     const [logType, setLogType] = useState<'stdout' | 'stderr'>('stdout');
     const [logLines, setLogLines] = useState<string[]>([]);
     const [lineCount, setLineCount] = useState<number>(100);
-    const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+    const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
 
     useEffect(() => {
         if (processId) {
             setSelectedProcessId(processId);
-        } else if (servers.length > 0 && !selectedProcessId) {
-            setSelectedProcessId(servers[0].id);
         }
-    }, [processId, servers, selectedProcessId]);
+    }, [processId]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
@@ -48,9 +40,7 @@ const LogsPage: React.FC = () => {
         }
 
         return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
+            if (interval) clearInterval(interval);
         };
     }, [selectedProcessId, logType, lineCount, autoRefresh]);
 
@@ -86,25 +76,17 @@ const LogsPage: React.FC = () => {
 
     return (
         <Box>
-            <Typography variant='h4' component='h1' sx={{ mb: 3 }}>
-                {t('logs.title')}
-            </Typography>
+            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <IconButton onClick={() => navigate('/processes')} title={t('common.close')}>
+                    <ArrowBackIcon />
+                </IconButton>
+                <Typography variant='h4' component='h1'>
+                    {t('logs.title')}
+                </Typography>
+            </Box>
 
             <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-                <FormControl sx={{ minWidth: 200 }}>
-                    <InputLabel>{t('process.fields.name')}</InputLabel>
-                    <Select
-                        value={selectedProcessId}
-                        onChange={e => setSelectedProcessId(e.target.value)}
-                        label={t('process.fields.name')}
-                    >
-                        {servers.map(server => (
-                            <MenuItem key={server.id} value={server.id}>
-                                {server.config.displayName || server.id}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                {/* process selector removed per requirement; LogsPage opened from ProcessesPage */}
 
                 <ToggleButtonGroup
                     value={logType}

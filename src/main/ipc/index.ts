@@ -4,8 +4,14 @@ import { ProcessManager } from '../services/ProcessManager';
 import { ConfigManager } from '../services/ConfigManager';
 import { LogManager } from '../services/LogManager';
 import { SystemUtils } from '../utils/SystemUtils';
+import { NgrokMultiTunnelManager } from '../services/NgrokMultiTunnelManager';
 
-export function initializeIPC(processManager: ProcessManager, configManager: ConfigManager, logManager: LogManager) {
+export function initializeIPC(
+    processManager: ProcessManager,
+    configManager: ConfigManager,
+    logManager: LogManager,
+    ngrokManager?: NgrokMultiTunnelManager
+) {
     // Process Management
     ipcMain.handle(IPC_CHANNELS.PROCESS_LIST, async () => {
         return await processManager.getAllProcesses();
@@ -74,5 +80,29 @@ export function initializeIPC(processManager: ProcessManager, configManager: Con
     // System
     ipcMain.handle(IPC_CHANNELS.SYSTEM_INFO, async () => {
         return await SystemUtils.getSystemInfo();
+    });
+
+    // Ngrok
+    ipcMain.handle(IPC_CHANNELS.NGROK_START, async () => {
+        if (!ngrokManager) return [];
+        try {
+            return await ngrokManager.start();
+        } catch (e: any) {
+            // Surface error message to renderer
+            throw new Error(e?.message || String(e));
+        }
+    });
+    ipcMain.handle(IPC_CHANNELS.NGROK_STOP, async () => {
+        if (!ngrokManager) return true;
+        await ngrokManager.stop();
+        return true;
+    });
+    ipcMain.handle(IPC_CHANNELS.NGROK_STATUS, async () => {
+        if (!ngrokManager) return [];
+        return ngrokManager.status();
+    });
+    ipcMain.handle(IPC_CHANNELS.NGROK_LOG_READ, async (_, lines?: number) => {
+        if (!ngrokManager) return [];
+        return await ngrokManager.readLogs(lines || 200);
     });
 }

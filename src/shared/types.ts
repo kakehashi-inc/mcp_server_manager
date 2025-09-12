@@ -41,6 +41,11 @@ export interface AppSettings {
     logRetentionDays: number;
     restartDelayMs: number;
     successfulStartThresholdMs: number;
+    // Ngrok settings
+    ngrokAuthToken?: string;
+    ngrokMetadataName?: string; // metadataに渡す識別名
+    ngrokPorts?: string; // カンマ区切り "3000,4000"
+    ngrokAutoStart?: boolean;
 }
 
 // Complete Config Structure
@@ -91,6 +96,12 @@ export const IPC_CHANNELS = {
     APP_QUIT: 'app:quit',
     APP_MINIMIZE: 'app:minimize',
     APP_MAXIMIZE: 'app:maximize',
+
+    // Ngrok
+    NGROK_START: 'ngrok:start',
+    NGROK_STOP: 'ngrok:stop',
+    NGROK_STATUS: 'ngrok:status',
+    NGROK_LOG_READ: 'ngrok:log:read',
 } as const;
 
 // System Info
