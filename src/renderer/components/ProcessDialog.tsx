@@ -39,6 +39,9 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
         wslDistribution: '',
         autoStart: false,
         autoRestartOnError: false,
+        useAuthProxy: false,
+        authProxyListenPort: '',
+        authProxyExternalUrl: '',
     });
 
     const [error, setError] = useState<string | null>(null);
@@ -58,6 +61,9 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                 wslDistribution: server.config.wslDistribution || '',
                 autoStart: server.config.autoStart || false,
                 autoRestartOnError: server.config.autoRestartOnError || false,
+                useAuthProxy: !!server.config.useAuthProxy,
+                authProxyListenPort: server.config.authProxyListenPort?.toString() || '',
+                authProxyExternalUrl: server.config.authProxyExternalUrl || '',
             });
         } else {
             setFormData({
@@ -70,6 +76,9 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                 wslDistribution: wslDistributions[0]?.name || '',
                 autoStart: false,
                 autoRestartOnError: false,
+                useAuthProxy: false,
+                authProxyListenPort: '',
+                authProxyExternalUrl: '',
             });
         }
         setError(null);
@@ -99,9 +108,20 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
             wslDistribution: formData.platform === 'wsl' ? formData.wslDistribution : undefined,
             autoStart: formData.autoStart,
             autoRestartOnError: formData.autoRestartOnError,
+            useAuthProxy: formData.useAuthProxy || undefined,
+            authProxyListenPort: formData.authProxyListenPort
+                ? Math.max(1, parseInt(formData.authProxyListenPort))
+                : undefined,
+            authProxyExternalUrl: formData.authProxyExternalUrl || undefined,
         };
 
         try {
+            if (serverConfig.useAuthProxy) {
+                if (!serverConfig.authProxyListenPort || !serverConfig.authProxyExternalUrl) {
+                    setError(t('process.dialog.authProxyMissingFields'));
+                    return;
+                }
+            }
             if (server) {
                 // Update existing server
                 await updateServer(server.id, serverConfig);
@@ -226,6 +246,37 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                         }
                         label={t('process.fields.autoRestartOnError')}
                     />
+
+                    <Box sx={{ mt: 1, p: 1, border: theme => `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={formData.useAuthProxy}
+                                    onChange={e => setFormData({ ...formData, useAuthProxy: e.target.checked })}
+                                />
+                            }
+                            label={t('process.fields.useAuthProxy')}
+                        />
+                        <Alert severity='info' sx={{ my: 1 }}>
+                            {t('process.dialog.authProxyNote')}
+                        </Alert>
+
+                        <TextField
+                            label={t('process.fields.authProxyListenPort')}
+                            type='number'
+                            value={formData.authProxyListenPort}
+                            onChange={e => setFormData({ ...formData, authProxyListenPort: e.target.value })}
+                            fullWidth
+                            disabled={!formData.useAuthProxy}
+                        />
+                        <TextField
+                            label={t('process.fields.authProxyExternalUrl')}
+                            value={formData.authProxyExternalUrl}
+                            onChange={e => setFormData({ ...formData, authProxyExternalUrl: e.target.value })}
+                            fullWidth
+                            disabled={!formData.useAuthProxy}
+                        />
+                    </Box>
                 </Box>
             </DialogContent>
             <DialogActions>

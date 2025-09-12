@@ -178,9 +178,10 @@ export class SystemUtils {
                 throw new Error('WSL distribution is required for platform "wsl"');
             }
 
-            const escapeSh = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
-            const envParts = Object.entries(options.env || {}).map(([key, value]) => `${key}=${escapeSh(value)}`);
-            const argsStr = (args || []).map(a => escapeSh(a)).join(' ');
+            const envParts = Object.entries(options.env || {}).map(
+                ([key, value]) => `${key}=${this.quoteEnvValueForShell(value)}`
+            );
+            const argsStr = (args || []).map(a => this.quoteArgForShell(a)).join(' ');
             const bashCommand = [envParts.join(' '), command, argsStr]
                 .filter(part => part && part.length > 0)
                 .join(' ')
@@ -200,6 +201,56 @@ export class SystemUtils {
             shell: false,
             env: { ...process.env, ...(options.env || {}) },
         });
+    }
+
+    // ---------- Quoting helpers ----------
+    // Detect if string is already wrapped with matching quotes '...'
+    // or "...". If so, do not re-wrap.
+    static isWrappedWithQuotes(value: string): boolean {
+        if (value.length < 2) return false;
+        const start = value[0];
+        const end = value[value.length - 1];
+        return (start === '"' && end === '"') || (start === "'" && end === "'");
+    }
+
+    // For bash shell command (WSL path): quote argument using double quotes
+    // Only wrap when not already wrapped. Escape characters that are special
+    // inside double quotes: ", \\, $, `.
+    static quoteArgForShell(value: string): string {
+        if (this.isWrappedWithQuotes(value)) return value;
+        return `"${String(value).replace(/(["\\$`])/g, '\\$1')}"`;
+    }
+
+    // For bash shell command (WSL path): quote env value using double quotes
+    // Same rules as quoteArgForShell.
+    static quoteEnvValueForShell(value: string): string {
+        if (this.isWrappedWithQuotes(value)) return value;
+        return `"${String(value).replace(/(["\\$`])/g, '\\$1')}"`;
+    }
+
+    // Build a display command line string from command + args (no env).
+    static buildDisplayCommandLine(command: string | null, args: string[] = []): string {
+        if (!command) return '(command not built)';
+        const tokens = [command, ...args.map(a => String(a))];
+        return tokens.join(' ');
+    }
+
+    // Build a display env string: KEY=VALUE pairs separated by spaces
+    static buildDisplayEnvString(env?: Record<string, string>): string {
+        const entries = Object.entries(env || {});
+        if (entries.length === 0) return '(none)';
+        return entries.map(([k, v]) => `${k}=${String(v)}`).join(' ');
+    }
+
+    static detectAuthProxyBinaryPath(preferredPath?: string, platform: NodeJS.Platform = process.platform): string {
+        if (preferredPath && preferredPath.trim().length > 0) {
+            return preferredPath;
+        }
+        // Name resolution by platform
+        if (platform === 'win32') {
+            return 'mcp-auth-proxy.exe';
+        }
+        return 'mcp-auth-proxy';
     }
 
     static execCommand(

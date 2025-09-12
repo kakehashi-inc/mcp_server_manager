@@ -1,6 +1,8 @@
 import { spawn, ChildProcess } from 'child_process';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import { MCPServerConfig, ProcessStatus } from '../../shared/types';
-import { PROCESS_CHECK_INTERVAL } from '../../shared/constants';
+import { PROCESS_CHECK_INTERVAL, getAppDataPath } from '../../shared/constants';
 import { LogManager } from './LogManager';
 import { ConfigManager } from './ConfigManager';
 import { BrowserWindow } from 'electron';
@@ -119,6 +121,12 @@ export class ProcessManager {
             return true;
         }
 
+        // Prepare variables to log in case of startup error
+        let runCommand: string | null = null;
+        let runArgs: string[] = [];
+        let runEnv: Record<string, string> | undefined = undefined;
+        let commandLogged = false;
+
         try {
             // Clear any pending restart timer before starting
             const pendingTimer = this.restartTimers.get(id);
@@ -143,10 +151,103 @@ export class ProcessManager {
                 }
             }
 
-            const childProcess: ChildProcess = SystemUtils.spawnCommand(config.command, config.args, {
+            // Build command: if useAuthProxy, wrap command via mcp-auth-proxy with OIDC flags
+            runCommand = config.command;
+            runArgs = [...(config.args || [])];
+            runEnv = config.env;
+
+            const settings = this.configManager.getSettings();
+
+            const shouldUseAuthProxy = !!config.useAuthProxy;
+            if (shouldUseAuthProxy) {
+                const authProxyBin = SystemUtils.detectAuthProxyBinaryPath(undefined);
+
+                const oidcProviderName = settings.oidcProviderName || 'Auth0';
+                const oidcConfigurationUrl = settings.oidcConfigurationUrl || '';
+                const oidcClientId = settings.oidcClientId || '';
+                const oidcClientSecret = settings.oidcClientSecret || '';
+                const allowedUsers = (settings.oidcAllowedUsers || '').trim();
+                const allowedUsersGlob = (settings.oidcAllowedUsersGlob || '').trim();
+
+                // Validate minimal requirements
+                if (!config.authProxyListenPort || !config.authProxyExternalUrl) {
+                    await this.logManager.createLogStream(id);
+                    await this.logManager.writeLog(
+                        id,
+                        'stderr',
+                        'mcp-auth-proxy requires listen port and external URL when enabled.'
+                    );
+                    this.updateProcessStatus(id, { status: 'error', pid: undefined, startedAt: undefined });
+                    return false;
+                }
+                if (!oidcConfigurationUrl || !oidcClientId || !oidcClientSecret) {
+                    await this.logManager.createLogStream(id);
+                    await this.logManager.writeLog(
+                        id,
+                        'stderr',
+                        'mcp-auth-proxy requires OIDC configuration URL, client ID, and client secret.'
+                    );
+                    this.updateProcessStatus(id, { status: 'error', pid: undefined, startedAt: undefined });
+                    return false;
+                }
+                if (!allowedUsers && !allowedUsersGlob) {
+                    await this.logManager.createLogStream(id);
+                    await this.logManager.writeLog(
+                        id,
+                        'stderr',
+                        'mcp-auth-proxy requires either allowed users or allowed users glob.'
+                    );
+                    this.updateProcessStatus(id, { status: 'error', pid: undefined, startedAt: undefined });
+                    return false;
+                }
+
+                // Ensure process-specific data directory exists under app data path
+                const baseDir = getAppDataPath();
+                const dataDir = path.join(baseDir, 'mcp-auth-proxy', id);
+                try {
+                    await fs.mkdir(dataDir, { recursive: true });
+                } catch {
+                    //
+                }
+
+                const proxyArgs: string[] = [
+                    '--external-url',
+                    String(config.authProxyExternalUrl),
+                    '--no-auto-tls',
+                    '--listen',
+                    `:${config.authProxyListenPort}`,
+                    '--data-path',
+                    dataDir,
+                    '--oidc-provider-name',
+                    String(oidcProviderName),
+                    '--oidc-configuration-url',
+                    String(oidcConfigurationUrl),
+                    '--oidc-client-id',
+                    String(oidcClientId),
+                    '--oidc-client-secret',
+                    String(oidcClientSecret),
+                ];
+                if (allowedUsers) {
+                    proxyArgs.push('--oidc-allowed-users', allowedUsers);
+                }
+                if (allowedUsersGlob) {
+                    proxyArgs.push('--oidc-allowed-users-glob', allowedUsersGlob);
+                }
+
+                // Append separator then original command and args
+                // Many CLIs require "--" to separate proxy flags and the subcommand
+                proxyArgs.push('--');
+                proxyArgs.push(config.command);
+                proxyArgs.push(...runArgs);
+
+                runCommand = authProxyBin;
+                runArgs = proxyArgs;
+            }
+
+            const childProcess: ChildProcess = SystemUtils.spawnCommand(runCommand, runArgs, {
                 platform: config.platform || 'host',
                 wslDistribution: config.wslDistribution,
-                env: config.env,
+                env: runEnv,
                 windowsHide: true,
             });
 
@@ -158,11 +259,51 @@ export class ProcessManager {
             });
 
             childProcess.stderr?.on('data', async data => {
-                await this.logManager.writeLog(id, 'stderr', data.toString());
+                const text = data.toString();
+                const looksLikeError = (s: string): boolean => {
+                    const lower = s.trim().toLowerCase();
+                    if (lower.length === 0) return false;
+                    // Heuristics: common error indicators at line start or well-known phrases
+                    return (
+                        /^error[\s:]/.test(lower) ||
+                        /^panic[\s:]/.test(lower) ||
+                        /^usage[\s:]/.test(lower) ||
+                        lower.includes('unknown shorthand flag') ||
+                        lower.includes('traceback') ||
+                        lower.includes('unhandledpromiserejection')
+                    );
+                };
+
+                if (!this.stoppingProcesses.has(id) && !commandLogged && looksLikeError(text)) {
+                    try {
+                        await this.logManager.createLogStream(id);
+                        const cmdline = SystemUtils.buildDisplayCommandLine(runCommand, runArgs || []);
+                        const envStr = SystemUtils.buildDisplayEnvString(runEnv);
+                        await this.logManager.writeLog(id, 'stderr', `Command (error): ${cmdline}`);
+                        await this.logManager.writeLog(id, 'stderr', `Env: ${envStr}`);
+                        commandLogged = true;
+                    } catch {}
+                }
+
+                await this.logManager.writeLog(id, 'stderr', text);
             });
 
             childProcess.on('error', async err => {
+                if (this.stoppingProcesses.has(id)) {
+                    // Ignore errors emitted while force-stopping
+                    return;
+                }
                 const prevStartedAt = this.processStatuses.get(id)?.startedAt ?? null;
+                try {
+                    if (!commandLogged) {
+                        await this.logManager.createLogStream(id);
+                        const cmdline = SystemUtils.buildDisplayCommandLine(runCommand, runArgs || []);
+                        const envStr = SystemUtils.buildDisplayEnvString(runEnv);
+                        await this.logManager.writeLog(id, 'stderr', `Command (failed): ${cmdline}`);
+                        await this.logManager.writeLog(id, 'stderr', `Env: ${envStr}`);
+                        commandLogged = true;
+                    }
+                } catch {}
                 await this.logManager.writeLog(
                     id,
                     'stderr',
@@ -180,15 +321,31 @@ export class ProcessManager {
 
             childProcess.on('exit', async code => {
                 const prevStartedAt = this.processStatuses.get(id)?.startedAt ?? null;
+                const stoppedByUser = this.stoppingProcesses.has(id);
+                if (!stoppedByUser && code && code !== 0 && !commandLogged) {
+                    try {
+                        await this.logManager.createLogStream(id);
+                        const cmdline = SystemUtils.buildDisplayCommandLine(runCommand, runArgs || []);
+                        const envStr = SystemUtils.buildDisplayEnvString(runEnv);
+                        await this.logManager.writeLog(id, 'stderr', `Command (exit ${code}): ${cmdline}`);
+                        await this.logManager.writeLog(id, 'stderr', `Env: ${envStr}`);
+                        commandLogged = true;
+                    } catch {}
+                }
                 this.runningProcesses.delete(id);
                 await this.logManager.closeLogStream(id);
 
                 this.updateProcessStatus(id, {
-                    status: code === 0 ? 'stopped' : 'error',
+                    status: stoppedByUser ? 'stopped' : code === 0 ? 'stopped' : 'error',
                     pid: undefined,
                     startedAt: undefined,
                 });
-                await this.handleProcessTermination('exit', id, code, prevStartedAt);
+                if (!stoppedByUser) {
+                    await this.handleProcessTermination('exit', id, code, prevStartedAt);
+                } else {
+                    // If user stopped, do not auto-restart and clear flag here
+                    this.stoppingProcesses.delete(id);
+                }
             });
 
             this.runningProcesses.set(id, childProcess);
@@ -201,7 +358,17 @@ export class ProcessManager {
 
             return true;
         } catch (error) {
+            const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
             console.error(`Failed to start process ${id}:`, error);
+            try {
+                await this.logManager.createLogStream(id);
+                // Log command and env first
+                const cmdline = SystemUtils.buildDisplayCommandLine(runCommand, runArgs || []);
+                const envStr = SystemUtils.buildDisplayEnvString(runEnv);
+                await this.logManager.writeLog(id, 'stderr', `Command: ${cmdline}`);
+                await this.logManager.writeLog(id, 'stderr', `Env: ${envStr}`);
+                await this.logManager.writeLog(id, 'stderr', `Failed to start process: ${message}`);
+            } catch {}
             this.updateProcessStatus(id, {
                 status: 'error',
             });

@@ -126,6 +126,7 @@ app.on('before-quit', async e => {
     e.preventDefault();
     try {
         // Ensure all child processes are stopped before exiting
+        // Treat as user-initiated stop to suppress error/command logs and restarts
         await processManager.stopAll();
     } catch (err) {
         // No-op; proceed to exit regardless

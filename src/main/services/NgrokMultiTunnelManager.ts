@@ -28,7 +28,9 @@ export class NgrokMultiTunnelManager {
 
     private getLogFilePath(): string {
         const logDir = this.configManager.getLogDirectory();
-        const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
         return path.join(logDir, `ngrok_${dateStr}.log`);
     }
 
@@ -40,7 +42,12 @@ export class NgrokMultiTunnelManager {
 
     private async log(message: string): Promise<void> {
         await this.ensureLogStream();
-        const ts = new Date().toISOString();
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const pad3 = (n: number) => String(n).padStart(3, '0');
+        const ts = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(
+            now.getMinutes()
+        )}:${pad(now.getSeconds())}.${pad3(now.getMilliseconds())}`;
         this.logStream!.write(`[${ts}] ${message}\n`);
     }
 

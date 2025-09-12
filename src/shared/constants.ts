@@ -16,6 +16,13 @@ export const DEFAULT_CONFIG: AppConfig = {
         ngrokMetadataName: 'MCP Server Manager',
         ngrokPorts: '',
         ngrokAutoStart: false,
+        // OIDC defaults for mcp-auth-proxy
+        oidcProviderName: 'Auth0',
+        oidcConfigurationUrl: '',
+        oidcClientId: '',
+        oidcClientSecret: '',
+        oidcAllowedUsers: '',
+        oidcAllowedUsersGlob: '',
     },
 };
 

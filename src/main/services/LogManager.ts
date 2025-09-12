@@ -32,8 +32,10 @@ export class LogManager {
     }
 
     private getLogFileName(processId: string, type: 'stdout' | 'stderr'): string {
-        const date = new Date();
-        const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+        const now = new Date();
+        // Local YYYYMMDD
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
         return `${processId}_${dateStr}_${type}.log`;
     }
 
@@ -58,7 +60,13 @@ export class LogManager {
             return this.writeLog(processId, type, data);
         }
 
-        const timestamp = new Date().toISOString();
+        // Local time without timezone, format: YYYY/MM/DD HH:mm:ss
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const pad3 = (n: number) => String(n).padStart(3, '0');
+        const timestamp = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(
+            now.getHours()
+        )}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${pad3(now.getMilliseconds())}`;
         const logEntry = `[${timestamp}] ${data}\n`;
 
         if (type === 'stdout') {

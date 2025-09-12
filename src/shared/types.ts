@@ -8,6 +8,10 @@ export interface MCPServerConfig {
     wslDistribution?: string;
     autoStart?: boolean;
     autoRestartOnError?: boolean;
+    // mcp-auth-proxy integration
+    useAuthProxy?: boolean;
+    authProxyListenPort?: number; // required when useAuthProxy
+    authProxyExternalUrl?: string; // required when useAuthProxy
 }
 
 export interface MCPServers {
@@ -46,6 +50,13 @@ export interface AppSettings {
     ngrokMetadataName?: string; // metadataに渡す識別名
     ngrokPorts?: string; // カンマ区切り "3000,4000"
     ngrokAutoStart?: boolean;
+    // OIDC settings for mcp-auth-proxy
+    oidcProviderName?: string; // 初期値: Auth0
+    oidcConfigurationUrl?: string;
+    oidcClientId?: string;
+    oidcClientSecret?: string;
+    oidcAllowedUsers?: string; // カンマ区切り
+    oidcAllowedUsersGlob?: string; // 例: *@example.com
 }
 
 // Complete Config Structure

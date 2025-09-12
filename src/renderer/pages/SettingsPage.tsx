@@ -201,6 +201,62 @@ const SettingsPage: React.FC = () => {
                 </Box>
             </Paper>
 
+            <Paper sx={{ p: 3, mb: 3 }}>
+                <Typography variant='h6' sx={{ mb: 2 }}>
+                    {t('settings.authProxy')}
+                </Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                        label={t('settings.oidcProviderName')}
+                        value={localSettings.oidcProviderName || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcProviderName: e.target.value })}
+                        fullWidth
+                        helperText='Default: Auth0'
+                    />
+
+                    <TextField
+                        label={t('settings.oidcConfigurationUrl')}
+                        value={localSettings.oidcConfigurationUrl || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcConfigurationUrl: e.target.value })}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.oidcClientId')}
+                        value={localSettings.oidcClientId || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcClientId: e.target.value })}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.oidcClientSecret')}
+                        type='password'
+                        value={localSettings.oidcClientSecret || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcClientSecret: e.target.value })}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.oidcAllowedUsers')}
+                        value={localSettings.oidcAllowedUsers || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcAllowedUsers: e.target.value })}
+                        fullWidth
+                        helperText={t('settings.oidcAllowedUsersSample')}
+                    />
+
+                    <TextField
+                        label={t('settings.oidcAllowedUsersGlob')}
+                        value={localSettings.oidcAllowedUsersGlob || ''}
+                        onChange={e => setLocalSettings({ ...localSettings, oidcAllowedUsersGlob: e.target.value })}
+                        fullWidth
+                        helperText={t('settings.oidcAllowedUsersGlobSample')}
+                    />
+
+                    <Alert severity='info'>{t('settings.oidcRequirementNote')}</Alert>
+                </Box>
+            </Paper>
+
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button variant='contained' startIcon={<SaveIcon />} onClick={handleSave}>
                     {t('settings.save')}

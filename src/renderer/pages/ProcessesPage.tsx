@@ -105,14 +105,51 @@ const ProcessesPage: React.FC = () => {
         if (server.config.displayName) {
             return (
                 <Box>
-                    <Typography variant='body1'>{server.config.displayName}</Typography>
-                    <Typography variant='caption' color='textSecondary'>
+                    <Typography
+                        variant='body1'
+                        noWrap
+                        sx={{
+                            maxWidth: '40ch',
+                            display: 'block',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {server.config.displayName}
+                    </Typography>
+                    <Typography
+                        variant='caption'
+                        color='textSecondary'
+                        noWrap
+                        sx={{
+                            maxWidth: '40ch',
+                            display: 'block',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                        }}
+                    >
                         {server.id}
                     </Typography>
                 </Box>
             );
         }
-        return <Typography variant='body1'>{server.id}</Typography>;
+        return (
+            <Typography
+                variant='body1'
+                noWrap
+                sx={{
+                    maxWidth: '40ch',
+                    display: 'block',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                }}
+            >
+                {server.id}
+            </Typography>
+        );
     };
 
     if (loading) {
@@ -141,6 +178,7 @@ const ProcessesPage: React.FC = () => {
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.name')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.command')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.platform')}</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Auth proxy</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.status')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }} align='center'>
                                 {t('process.fields.autoStart')}
@@ -157,7 +195,7 @@ const ProcessesPage: React.FC = () => {
 
                             return (
                                 <TableRow key={server.id}>
-                                    <TableCell>{getDisplayName(server)}</TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>{getDisplayName(server)}</TableCell>
                                     <TableCell>
                                         <Typography
                                             variant='body2'
@@ -178,6 +216,11 @@ const ProcessesPage: React.FC = () => {
                                         {server.config.platform === 'wsl'
                                             ? `WSL (${server.config.wslDistribution})`
                                             : t('process.platform.host')}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='body2' sx={{ fontFamily: 'monospace' }}>
+                                            {server.config.useAuthProxy ? 'ON' : '-'}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell>{getStatusChip(server.id)}</TableCell>
                                     <TableCell align='center'>
