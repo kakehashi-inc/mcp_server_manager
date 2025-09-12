@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import useStore from '../store/useStore';
 import {
     Box,
     Button,
@@ -14,7 +15,10 @@ import {
     Stack,
     TextField,
     Alert,
+    IconButton,
+    ToggleButton,
 } from '@mui/material';
+import { ContentCopy as ContentCopyIcon, Refresh as RefreshIcon, Clear as ClearIcon } from '@mui/icons-material';
 
 interface TunnelInfo {
     port: number;
@@ -24,11 +28,23 @@ interface TunnelInfo {
 
 const NgrokPage: React.FC = () => {
     const { t } = useTranslation();
+    const showToast = useStore(s => s.showToast);
     const [tunnels, setTunnels] = useState<TunnelInfo[]>([]);
     const [logs, setLogs] = useState<string[]>([]);
-    const [lines, setLines] = useState<number>(200);
+    const [lines, setLines] = useState<number>(100);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState<boolean>(false);
+    const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+
+    const handleCopy = (text: string) => {
+        if (!text) return;
+        try {
+            navigator.clipboard.writeText(text);
+        } catch {
+            //
+        }
+        showToast(t('common.copied'));
+    };
 
     const refresh = async () => {
         try {
@@ -49,10 +65,15 @@ const NgrokPage: React.FC = () => {
 
     useEffect(() => {
         refresh();
-        const timer = setInterval(refresh, 2000);
-        return () => clearInterval(timer);
+        let timer: NodeJS.Timeout | null = null;
+        if (autoRefresh) {
+            timer = setInterval(refresh, 2000);
+        }
+        return () => {
+            if (timer) clearInterval(timer);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lines]);
+    }, [lines, autoRefresh]);
 
     const handleStart = async () => {
         setBusy(true);
@@ -81,7 +102,7 @@ const NgrokPage: React.FC = () => {
     };
 
     return (
-        <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
                 <Typography variant='h4'>{t('ngrok.title')}</Typography>
                 <Stack direction='row' spacing={1}>
@@ -100,7 +121,7 @@ const NgrokPage: React.FC = () => {
                 </Alert>
             )}
 
-            <Paper sx={{ p: 2, mb: 3 }}>
+            <Paper sx={{ p: 2, mb: 3, flexShrink: 0 }}>
                 <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
                     <Typography variant='h6'>{t('ngrok.status')}</Typography>
                     <Typography variant='body2' color='text.secondary'>
@@ -111,7 +132,7 @@ const NgrokPage: React.FC = () => {
                     <Table size='small'>
                         <TableHead>
                             <TableRow>
-                                <TableCell>{t('ngrok.ports')}</TableCell>
+                                <TableCell sx={{ width: '8ch', whiteSpace: 'nowrap' }}>{t('ngrok.ports')}</TableCell>
                                 <TableCell>{t('ngrok.url')}</TableCell>
                             </TableRow>
                         </TableHead>
@@ -125,12 +146,20 @@ const NgrokPage: React.FC = () => {
                                     const urlText = typeof t.url === 'string' ? t.url : '';
                                     return (
                                         <TableRow key={t.port}>
-                                            <TableCell>{t.port}</TableCell>
+                                            <TableCell sx={{ width: '8ch', whiteSpace: 'nowrap' }}>{t.port}</TableCell>
                                             <TableCell>
                                                 {urlText ? (
-                                                    <a href={urlText} target='_blank' rel='noreferrer'>
-                                                        {urlText}
-                                                    </a>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <IconButton size='small' onClick={() => handleCopy(urlText)}>
+                                                            <ContentCopyIcon fontSize='inherit' />
+                                                        </IconButton>
+                                                        <Typography
+                                                            variant='body2'
+                                                            sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+                                                        >
+                                                            {urlText}
+                                                        </Typography>
+                                                    </Box>
                                                 ) : (
                                                     '-'
                                                 )}
@@ -144,17 +173,52 @@ const NgrokPage: React.FC = () => {
                 </TableContainer>
             </Paper>
 
-            <Paper sx={{ p: 2 }}>
-                <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
-                    <Typography variant='h6'>{t('ngrok.logs')}</Typography>
+            <Paper sx={{ p: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
+                    <Typography variant='h6' sx={{ mr: 1 }}>
+                        {t('ngrok.logs')}
+                    </Typography>
                     <TextField
                         size='small'
                         type='number'
                         label={t('logs.lines')}
                         value={lines}
-                        onChange={e => setLines(Math.max(10, parseInt(e.target.value) || 200))}
-                        sx={{ width: 160 }}
+                        onChange={e => setLines(Math.max(10, parseInt(e.target.value) || 100))}
+                        sx={{ width: 140 }}
                     />
+                    <ToggleButton
+                        value='auto'
+                        selected={autoRefresh}
+                        onChange={() => setAutoRefresh(v => !v)}
+                        size='small'
+                    >
+                        {t('logs.autoRefresh')}
+                    </ToggleButton>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <IconButton onClick={refresh} title={t('logs.refresh')} disabled={busy}>
+                        <RefreshIcon />
+                    </IconButton>
+                    <IconButton
+                        onClick={() => {
+                            try {
+                                navigator.clipboard.writeText(logs.join('\n'));
+                            } catch {}
+                            showToast(t('common.copied'));
+                        }}
+                        title={t('common.copy')}
+                    >
+                        <ContentCopyIcon />
+                    </IconButton>
+                    <IconButton
+                        color='error'
+                        onClick={async () => {
+                            await window.electronAPI.ngrokAPI.clearLogs();
+                            await refresh();
+                        }}
+                        title={t('logs.clear')}
+                    >
+                        <ClearIcon />
+                    </IconButton>
                 </Stack>
                 <Box
                     sx={{
@@ -163,7 +227,8 @@ const NgrokPage: React.FC = () => {
                         fontFamily: 'monospace',
                         p: 1,
                         borderRadius: 1,
-                        height: 280,
+                        flex: 1,
+                        minHeight: 0,
                         overflow: 'auto',
                         whiteSpace: 'pre',
                     }}

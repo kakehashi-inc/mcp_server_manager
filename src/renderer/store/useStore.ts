@@ -22,6 +22,7 @@ interface AppState {
     // UI State
     loading: boolean;
     error: string | null;
+    snackbar: { open: boolean; message: string } | null;
 
     // Actions
     setConfig: (config: AppConfig) => void;
@@ -40,6 +41,8 @@ interface AppState {
 
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
+    showToast: (message: string) => void;
+    closeToast: () => void;
 
     // Initialize
     initialize: () => Promise<void>;
@@ -55,6 +58,7 @@ const useStore = create<AppState>((set, get) => ({
     wslDistributions: [],
     loading: false,
     error: null,
+    snackbar: null,
 
     // Config actions
     setConfig: config => {
@@ -122,6 +126,8 @@ const useStore = create<AppState>((set, get) => ({
     // UI actions
     setLoading: loading => set({ loading }),
     setError: error => set({ error }),
+    showToast: message => set({ snackbar: { open: true, message } }),
+    closeToast: () => set({ snackbar: null }),
 
     // Initialize
     initialize: async () => {

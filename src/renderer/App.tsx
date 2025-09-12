@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline, Snackbar, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import useStore from './store/useStore';
 import Layout from './components/Layout';
@@ -67,6 +67,7 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
+            <GlobalSnackbar />
             {import.meta.env.DEV ? (
                 <BrowserRouter>
                     <Layout>
@@ -97,3 +98,20 @@ function App() {
 }
 
 export default App;
+
+function GlobalSnackbar() {
+    const snackbar = useStore(s => s.snackbar);
+    const close = useStore(s => s.closeToast);
+    return (
+        <Snackbar
+            open={!!snackbar?.open}
+            autoHideDuration={2000}
+            onClose={close}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+            <Alert severity='success' onClose={close} sx={{ width: '100%' }}>
+                {snackbar?.message || ''}
+            </Alert>
+        </Snackbar>
+    );
+}

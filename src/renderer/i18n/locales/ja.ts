@@ -2,12 +2,6 @@ export default {
     app: {
         title: 'MCP サーバーマネージャー',
     },
-    nav: {
-        processes: 'プロセス',
-        settings: '設定',
-        logs: 'ログ',
-        ngrok: 'Ngrok',
-    },
     process: {
         title: 'プロセス管理',
         add: 'プロセスを追加',
@@ -76,6 +70,7 @@ export default {
         clear: 'クリア',
         refresh: '更新',
         lines: '行数',
+        autoRefresh: '自動更新',
         noLogs: 'ログがありません',
     },
     ngrok: {
@@ -98,5 +93,7 @@ export default {
         success: '成功',
         warning: '警告',
         info: '情報',
+        copy: 'コピー',
+        copied: 'コピーしました',
     },
 };

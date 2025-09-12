@@ -105,4 +105,12 @@ export function initializeIPC(
         if (!ngrokManager) return [];
         return await ngrokManager.readLogs(lines || 200);
     });
+    ipcMain.handle(IPC_CHANNELS.NGROK_LOG_CLEAR, async () => {
+        if (!ngrokManager) return;
+        try {
+            await ngrokManager.clearLogs();
+        } catch {
+            // ignore
+        }
+    });
 }

@@ -158,4 +158,13 @@ export class NgrokMultiTunnelManager {
             return [];
         }
     }
+
+    async clearLogs(): Promise<void> {
+        try {
+            const file = this.getLogFilePath();
+            await fs.writeFile(file, '', 'utf-8');
+        } catch {
+            // ignore
+        }
+    }
 }

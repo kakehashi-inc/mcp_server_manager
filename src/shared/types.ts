@@ -102,6 +102,7 @@ export const IPC_CHANNELS = {
     NGROK_STOP: 'ngrok:stop',
     NGROK_STATUS: 'ngrok:status',
     NGROK_LOG_READ: 'ngrok:log:read',
+    NGROK_LOG_CLEAR: 'ngrok:log:clear',
 } as const;
 
 // System Info

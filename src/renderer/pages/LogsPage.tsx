@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, IconButton } from '@mui/material';
+import useStore from '../store/useStore';
 import {
     Refresh as RefreshIcon,
     Clear as ClearIcon,
     ContentCopy as CopyIcon,
     ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import useStore from '../store/useStore';
 
 const LogsPage: React.FC = () => {
     const { t } = useTranslation();
+    const showToast = useStore(s => s.showToast);
     const { processId } = useParams();
     const navigate = useNavigate();
     const { servers } = useStore();
@@ -69,7 +70,10 @@ const LogsPage: React.FC = () => {
 
     const handleCopyLogs = () => {
         const logsText = logLines.join('\n');
-        navigator.clipboard.writeText(logsText);
+        try {
+            navigator.clipboard.writeText(logsText);
+        } catch {}
+        showToast(t('common.copied'));
     };
 
     const selectedServer = servers.find(s => s.id === selectedProcessId);
@@ -107,14 +111,13 @@ const LogsPage: React.FC = () => {
                     sx={{ width: 120 }}
                     size='small'
                 />
-
                 <ToggleButton
                     value='auto'
                     selected={autoRefresh}
                     onChange={() => setAutoRefresh(!autoRefresh)}
                     size='small'
                 >
-                    Auto Refresh
+                    {t('logs.autoRefresh')}
                 </ToggleButton>
 
                 <Box sx={{ flexGrow: 1 }} />
@@ -123,7 +126,7 @@ const LogsPage: React.FC = () => {
                     <RefreshIcon />
                 </IconButton>
 
-                <IconButton onClick={handleCopyLogs} title='Copy'>
+                <IconButton onClick={handleCopyLogs} title={t('common.copy')}>
                     <CopyIcon />
                 </IconButton>
 

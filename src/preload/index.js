@@ -51,6 +51,7 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
         stop: () => electron_1.ipcRenderer.invoke(types_1.IPC_CHANNELS.NGROK_STOP),
         status: () => electron_1.ipcRenderer.invoke(types_1.IPC_CHANNELS.NGROK_STATUS),
         readLogs: lines => electron_1.ipcRenderer.invoke(types_1.IPC_CHANNELS.NGROK_LOG_READ, lines),
+        clearLogs: () => electron_1.ipcRenderer.invoke(types_1.IPC_CHANNELS.NGROK_LOG_CLEAR),
     },
     // Window controls
     windowAPI: {

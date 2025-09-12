@@ -2,12 +2,6 @@ export default {
     app: {
         title: 'MCP Server Manager',
     },
-    nav: {
-        processes: 'Processes',
-        settings: 'Settings',
-        logs: 'Logs',
-        ngrok: 'Ngrok',
-    },
     process: {
         title: 'Process Management',
         add: 'Add Process',
@@ -76,6 +70,7 @@ export default {
         clear: 'Clear',
         refresh: 'Refresh',
         lines: 'Lines',
+        autoRefresh: 'Auto Refresh',
         noLogs: 'No logs available',
     },
     ngrok: {
@@ -98,5 +93,7 @@ export default {
         success: 'Success',
         warning: 'Warning',
         info: 'Info',
+        copy: 'Copy',
+        copied: 'Copied to clipboard',
     },
 };
