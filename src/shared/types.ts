@@ -7,6 +7,7 @@ export interface MCPServerConfig {
     platform?: 'host' | 'wsl';
     wslDistribution?: string;
     autoStart?: boolean;
+    autoRestartOnError?: boolean;
 }
 
 export interface MCPServers {
@@ -38,6 +39,8 @@ export interface AppSettings {
     darkMode: boolean;
     logDirectory: string;
     logRetentionDays: number;
+    restartDelayMs: number;
+    successfulStartThresholdMs: number;
 }
 
 // Complete Config Structure

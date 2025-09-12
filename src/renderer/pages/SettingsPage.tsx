@@ -88,23 +88,17 @@ const SettingsPage: React.FC = () => {
                             <MenuItem value='en'>English</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={localSettings.darkMode}
+                                onChange={e => setLocalSettings({ ...localSettings, darkMode: e.target.checked })}
+                            />
+                        }
+                        label={t('settings.darkMode')}
+                    />
                 </Box>
-            </Paper>
-
-            <Paper sx={{ p: 3, mb: 3 }}>
-                <Typography variant='h6' sx={{ mb: 2 }}>
-                    {t('settings.appearance')}
-                </Typography>
-
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={localSettings.darkMode}
-                            onChange={e => setLocalSettings({ ...localSettings, darkMode: e.target.checked })}
-                        />
-                    }
-                    label={t('settings.darkMode')}
-                />
             </Paper>
 
             <Paper sx={{ p: 3, mb: 3 }}>
@@ -134,6 +128,42 @@ const SettingsPage: React.FC = () => {
                             inputProps: { min: 1, max: 365 },
                             endAdornment: t('settings.days'),
                         }}
+                    />
+                </Box>
+            </Paper>
+
+            <Paper sx={{ p: 3, mb: 3 }}>
+                <Typography variant='h6' sx={{ mb: 2 }}>
+                    {t('settings.advanced')}
+                </Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                        label={t('settings.restartDelayMs')}
+                        type='number'
+                        value={localSettings.restartDelayMs}
+                        onChange={e =>
+                            setLocalSettings({
+                                ...localSettings,
+                                restartDelayMs: Math.max(0, parseInt(e.target.value) || 0),
+                            })
+                        }
+                        InputProps={{ inputProps: { min: 0, step: 100 } }}
+                        fullWidth
+                    />
+
+                    <TextField
+                        label={t('settings.successfulStartThresholdMs')}
+                        type='number'
+                        value={localSettings.successfulStartThresholdMs}
+                        onChange={e =>
+                            setLocalSettings({
+                                ...localSettings,
+                                successfulStartThresholdMs: Math.max(0, parseInt(e.target.value) || 0),
+                            })
+                        }
+                        InputProps={{ inputProps: { min: 0, step: 1000 } }}
+                        fullWidth
                     />
                 </Box>
             </Paper>

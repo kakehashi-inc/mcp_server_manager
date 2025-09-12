@@ -38,6 +38,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
         platform: 'host' as 'host' | 'wsl',
         wslDistribution: '',
         autoStart: false,
+        autoRestartOnError: false,
     });
 
     const [error, setError] = useState<string | null>(null);
@@ -56,6 +57,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                 platform: server.config.platform || 'host',
                 wslDistribution: server.config.wslDistribution || '',
                 autoStart: server.config.autoStart || false,
+                autoRestartOnError: server.config.autoRestartOnError || false,
             });
         } else {
             setFormData({
@@ -67,6 +69,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                 platform: 'host',
                 wslDistribution: wslDistributions[0]?.name || '',
                 autoStart: false,
+                autoRestartOnError: false,
             });
         }
         setError(null);
@@ -95,6 +98,7 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
             platform: formData.platform,
             wslDistribution: formData.platform === 'wsl' ? formData.wslDistribution : undefined,
             autoStart: formData.autoStart,
+            autoRestartOnError: formData.autoRestartOnError,
         };
 
         try {
@@ -211,6 +215,16 @@ const ProcessDialog: React.FC<ProcessDialogProps> = ({ open, onClose, server }) 
                             />
                         }
                         label={t('process.fields.autoStart')}
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={formData.autoRestartOnError}
+                                onChange={e => setFormData({ ...formData, autoRestartOnError: e.target.checked })}
+                            />
+                        }
+                        label={t('process.fields.autoRestartOnError')}
                     />
                 </Box>
             </DialogContent>

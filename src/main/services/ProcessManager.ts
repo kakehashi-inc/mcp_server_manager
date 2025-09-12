@@ -12,12 +12,16 @@ export class ProcessManager {
     private logManager: LogManager;
     private configManager: ConfigManager;
     private monitoringInterval: NodeJS.Timeout | null = null;
+    private restartTimers: Map<string, NodeJS.Timeout>;
+    private stoppingProcesses: Set<string>;
 
     constructor(logManager: LogManager, configManager: ConfigManager) {
         this.runningProcesses = new Map();
         this.processStatuses = new Map();
         this.logManager = logManager;
         this.configManager = configManager;
+        this.restartTimers = new Map();
+        this.stoppingProcesses = new Set();
     }
 
     async initialize(): Promise<void> {
@@ -116,6 +120,12 @@ export class ProcessManager {
         }
 
         try {
+            // Clear any pending restart timer before starting
+            const pendingTimer = this.restartTimers.get(id);
+            if (pendingTimer) {
+                clearTimeout(pendingTimer);
+                this.restartTimers.delete(id);
+            }
             // Guard: WSL指定だがWSLが利用不可
             if ((config.platform || 'host') === 'wsl') {
                 const wslAvailable = await SystemUtils.isWSLAvailable();
@@ -152,6 +162,7 @@ export class ProcessManager {
             });
 
             childProcess.on('error', async err => {
+                const prevStartedAt = this.processStatuses.get(id)?.startedAt ?? null;
                 await this.logManager.writeLog(
                     id,
                     'stderr',
@@ -164,9 +175,11 @@ export class ProcessManager {
                     pid: undefined,
                     startedAt: undefined,
                 });
+                await this.handleProcessTermination('error', id, null, prevStartedAt);
             });
 
             childProcess.on('exit', async code => {
+                const prevStartedAt = this.processStatuses.get(id)?.startedAt ?? null;
                 this.runningProcesses.delete(id);
                 await this.logManager.closeLogStream(id);
 
@@ -175,6 +188,7 @@ export class ProcessManager {
                     pid: undefined,
                     startedAt: undefined,
                 });
+                await this.handleProcessTermination('exit', id, code, prevStartedAt);
             });
 
             this.runningProcesses.set(id, childProcess);
@@ -202,6 +216,9 @@ export class ProcessManager {
         }
 
         return new Promise(resolve => {
+            // mark as stopping to suppress auto-restart
+            this.stoppingProcesses.add(id);
+
             childProcess.on('exit', () => {
                 this.runningProcesses.delete(id);
                 this.updateProcessStatus(id, {
@@ -209,6 +226,13 @@ export class ProcessManager {
                     pid: undefined,
                     startedAt: undefined,
                 });
+                // clear any scheduled restart for this id
+                const pendingTimer = this.restartTimers.get(id);
+                if (pendingTimer) {
+                    clearTimeout(pendingTimer);
+                    this.restartTimers.delete(id);
+                }
+                this.stoppingProcesses.delete(id);
                 resolve(true);
             });
 
@@ -271,6 +295,7 @@ export class ProcessManager {
             try {
                 // Check if process is still running
                 if (childProcess.killed || childProcess.exitCode !== null) {
+                    const prevStartedAt = this.processStatuses.get(id)?.startedAt ?? null;
                     this.runningProcesses.delete(id);
                     await this.logManager.closeLogStream(id);
                     this.updateProcessStatus(id, {
@@ -278,6 +303,7 @@ export class ProcessManager {
                         pid: undefined,
                         startedAt: undefined,
                     });
+                    await this.handleProcessTermination('exit', id, childProcess.exitCode, prevStartedAt);
                 } else {
                     // Update resource usage if possible
                     this.updateProcessStatus(id, {
@@ -296,5 +322,62 @@ export class ProcessManager {
 
     async getAllStatuses(): Promise<ProcessStatus[]> {
         return Array.from(this.processStatuses.values());
+    }
+
+    private async handleProcessTermination(
+        eventType: 'exit' | 'error',
+        id: string,
+        exitCode: number | null,
+        previousStartedAtIso: string | null
+    ): Promise<void> {
+        // Do not restart if we intentionally stopped it
+        if (this.stoppingProcesses.has(id)) {
+            return;
+        }
+
+        const config = this.configManager.getMCPServer(id);
+        if (!config || !config.autoRestartOnError) {
+            return;
+        }
+
+        // For 'exit', only restart on non-zero exit code. For 'error', always consider abnormal.
+        if (eventType === 'exit' && (exitCode === 0 || exitCode === null)) {
+            return;
+        }
+
+        // Ensure it ran long enough to be considered a successful start
+        const startedAt = previousStartedAtIso ? Date.parse(previousStartedAtIso) : NaN;
+        const now = Date.now();
+        const settings = this.configManager.getSettings();
+        const threshold = settings.successfulStartThresholdMs ?? 10000;
+        const ranMs = isNaN(startedAt) ? 0 : Math.max(0, now - startedAt);
+        if (ranMs < threshold) {
+            return;
+        }
+
+        // Schedule restart after configured delay
+        const delay = settings.restartDelayMs ?? 0;
+        // prevent duplicate schedules
+        if (this.restartTimers.has(id)) {
+            return;
+        }
+
+        await this.logManager.createLogStream(id);
+        await this.logManager.writeLog(
+            id,
+            'stderr',
+            `Process ${id} terminated (${eventType}${
+                eventType === 'exit' ? ` code=${exitCode}` : ''
+            }). Scheduling restart in ${delay} ms.`
+        );
+        const timer = setTimeout(async () => {
+            this.restartTimers.delete(id);
+            try {
+                await this.startProcess(id);
+            } catch (e) {
+                // best-effort; error already handled in startProcess
+            }
+        }, delay);
+        this.restartTimers.set(id, timer);
     }
 }

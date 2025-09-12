@@ -10,6 +10,8 @@ export const DEFAULT_CONFIG: AppConfig = {
         darkMode: false,
         logDirectory: path.join(os.homedir(), '.mcpm', 'logs'),
         logRetentionDays: 7,
+        restartDelayMs: 5000,
+        successfulStartThresholdMs: 10000,
     },
 };
 
