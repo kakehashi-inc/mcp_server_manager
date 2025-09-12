@@ -5,7 +5,7 @@ import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import {
     Memory as ProcessIcon,
     Settings as SettingsIcon,
-    Description as LogsIcon,
+    Lan as NgrokIcon,
     Minimize as MinimizeIcon,
     CropSquare as MaximizeIcon,
     Close as CloseIcon,
@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2, display: 'flex', gap: 1 }}>
                         {[
                             { path: '/processes', Icon: ProcessIcon, key: 'proc' },
-                            { path: '/ngrok', Icon: LogsIcon, key: 'ngrok' },
+                            { path: '/ngrok', Icon: NgrokIcon, key: 'ngrok' },
                             { path: '/settings', Icon: SettingsIcon, key: 'settings' },
                         ].map(({ path, Icon, key }) => {
                             const active = location.pathname.startsWith(path);

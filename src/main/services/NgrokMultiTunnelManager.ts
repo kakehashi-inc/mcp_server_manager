@@ -18,6 +18,8 @@ export class NgrokMultiTunnelManager {
     private session: NgrokSession | null = null;
     private listeners: Map<number, NgrokListener> = new Map();
     private tunnelInfos: Map<number, NgrokTunnelInfo> = new Map();
+    private connections: Map<number, any> = new Map();
+    private ngrokModule: any | null = null;
     private logStream: WriteStream | null = null;
 
     constructor(configManager: ConfigManager) {
@@ -61,13 +63,18 @@ export class NgrokMultiTunnelManager {
             throw new Error('No ngrok ports configured');
         }
 
-        // Close previous session if any
-        await this.stop();
+        // Close previous session only if already running
+        const isRunning = this.listeners.size > 0 || this.session !== null || this.tunnelInfos.size > 0;
+        if (isRunning) {
+            await this.stop();
+        }
 
         try {
+            await this.log(`Ngrok start requested. Ports: ${ports.join(', ') || '-'}`);
             // Dynamic import to support ESM package in CJS
             const ngrokMod = await import('@ngrok/ngrok');
             const ngrok: any = (ngrokMod as any).default ?? ngrokMod;
+            this.ngrokModule = ngrok;
             // Prefer widely compatible API first
             for (const port of ports) {
                 const urlObj = await ngrok.connect({ addr: port, authtoken: authToken, metadata, proto: 'http' });
@@ -89,8 +96,10 @@ export class NgrokMultiTunnelManager {
 
                 const info: NgrokTunnelInfo = { port, url, name: `port-${port}` };
                 this.tunnelInfos.set(port, info);
+                this.connections.set(port, urlObj);
                 await this.log(`Tunnel started: ${port} -> ${url || '[no url]'}`);
             }
+            await this.log(`Ngrok start completed. Active tunnels: ${this.tunnelInfos.size}`);
 
             // Optionally try new Session API if specifically enabled in the future
             // (kept commented out to avoid incompatibility issues)
@@ -117,6 +126,36 @@ export class NgrokMultiTunnelManager {
 
     async stop(): Promise<void> {
         try {
+            await this.log(`Ngrok stop requested.`);
+            // Close per-port connection objects from connect()
+            if (this.connections.size > 0) {
+                for (const [port, conn] of this.connections.entries()) {
+                    try {
+                        if (conn && typeof conn.close === 'function') {
+                            await conn.close();
+                        } else if (this.ngrokModule && typeof this.ngrokModule.disconnect === 'function') {
+                            // Try to derive URL string for disconnect
+                            let url = '';
+                            try {
+                                if (conn && typeof conn === 'string') url = conn;
+                                else if (conn && typeof conn.url === 'function') url = conn.url();
+                                else if (conn && typeof conn.url === 'string') url = conn.url;
+                                else if (conn && typeof conn.toString === 'function') url = conn.toString();
+                            } catch {}
+                            if (url) {
+                                await this.ngrokModule.disconnect(url);
+                            }
+                        }
+                    } catch (e) {
+                        await this.log(
+                            `Warn: failed to close connection for port ${port}: ${
+                                e instanceof Error ? e.message : String(e)
+                            }`
+                        );
+                    }
+                }
+                this.connections.clear();
+            }
             if (this.listeners.size > 0) {
                 for (const listener of this.listeners.values()) {
                     try {
@@ -136,6 +175,7 @@ export class NgrokMultiTunnelManager {
                 this.session = null;
             }
             this.tunnelInfos.clear();
+            await this.log('Ngrok stopped. All tunnels closed.');
         } finally {
             if (this.logStream) {
                 this.logStream.end();
