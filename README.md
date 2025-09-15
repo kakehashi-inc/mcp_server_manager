@@ -1,125 +1,111 @@
 # MCP Server Manager
 
-MCPサーバープロセスを管理するためのElectronベースのGUIアプリケーション
+Electron-based GUI to start/stop, monitor, log, and expose (via ngrok) MCP servers.
 
-## 機能
+## Features
 
-- **プロセス管理**: Windows/macOS/Linuxでのプロセス起動・停止
-- **WSL対応**: Windows WSL内でのプロセス実行
-- **ログ管理**: 標準出力/エラー出力の分離記録とローテーション
-- **多言語対応**: 日本語/英語
-- **ダークモード**: UIテーマの切り替え
-- **自動起動**: アプリ起動時の自動プロセス起動
+- Process management: register arbitrary MCP server commands, start/stop, status monitoring, error handling
+- Auto start / auto restart: start on app launch, conditional auto-restart on abnormal exit
+- WSL support (Windows): run inside WSL with selectable distribution (`platform: "wsl"`)
+- Log management: per-process daily log files for `stdout`/`stderr`, auto-clean by retention days, hourly rotation
+- ngrok integration: open multiple ports at once, show/copy URLs, view/clear ngrok logs
+- Auth Proxy (optional): wrap with `mcp-auth-proxy` to add OIDC authentication
+- i18n/theme: Japanese/English, light/dark modes
 
-## 対応OS
+## Supported OS
 
-- Windows 10/11 (WSL対応)
+- Windows 10/11 (with WSL detection/list)
 - macOS 10.15+
 - Linux (Ubuntu/Debian, RHEL/CentOS/Fedora)
 
-## 開発環境のセットアップ
+## Setup
 
-### 必要要件
+### Requirements
 
-- Node.js 22.x以上
+- Node.js 22.x+
 - yarn 4
 - Git
 
-### インストール
+### Install
 
 ```bash
-# リポジトリのクローン
+# Clone the repository
 git clone <repository-url>
 cd mcp_server_manager
 
-# 依存関係のインストール
+# Install dependencies
 yarn install
 
-# 開発起動
+# Start development (main: tsc -w / renderer: Vite / Electron)
 yarn dev
 ```
 
-## ビルド
+## Build/Distribute
 
-### 全プラットフォーム向けビルド
-```bash
-yarn dist
+- All platforms: `yarn dist`
+- Windows: `yarn dist:win`
+- macOS: `yarn dist:mac`
+- Linux: `yarn dist:linux`
+
+In development the app uses BrowserRouter with `<http://localhost:3001>`, and in production it uses HashRouter to load `dist/renderer/index.html`.
+
+## Project Structure (excerpt)
+
+```text
+src/
+├── main/                  # Electron main: IPC and managers
+│   ├── index.ts           # App boot / window / service init
+│   ├── ipc/               # IPC handlers
+│   ├── services/          # Process/Config/Log/ngrok managers
+│   └── utils/             # SystemUtils (WSL/exec helpers)
+├── preload/               # Safe bridge APIs to renderer
+├── renderer/              # React + MUI UI (Processes/Logs/Settings/Ngrok)
+├── shared/                # Types and constants (defaults/paths)
+└── public/                # Icons
 ```
 
-### プラットフォーム別ビルド
-```bash
-# Windows
-yarn dist:win
+## Tech Stack
 
-# macOS
-yarn dist:mac
+- Electron
+- React (MUI v7)
+- TypeScript
+- Zustand
+- i18next
+- Vite
 
-# Linux
-yarn dist:linux
-```
-
-## プロジェクト構造
-
-```
-mcp_server_manager/
-├── src/
-│   ├── main/              # Electronメインプロセス
-│   │   ├── index.ts        # エントリポイント
-│   │   ├── ipc/            # IPCハンドラー
-│   │   ├── services/       # サービス層
-│   │   └── utils/          # ユーティリティ
-│   ├── renderer/           # Reactレンダラープロセス
-│   │   ├── App.tsx         # メインコンポーネント
-│   │   ├── components/     # UIコンポーネント
-│   │   ├── pages/          # ページコンポーネント
-│   │   ├── store/          # 状態管理
-│   │   └── i18n/           # 多言語対応
-│   ├── shared/             # 共通型定義
-│   └── preload/            # プリロードスクリプト
-├── public/                 # 静的ファイル
-└── dist/                   # ビルド出力
-```
-
-## 使用技術
-
-- **Electron**: デスクトップアプリケーションフレームワーク
-- **React**: UIフレームワーク
-- **TypeScript**: 型安全な開発
-- **Material-UI**: UIコンポーネント
-- **Zustand**: 状態管理
-- **i18next**: 多言語対応
-- **Vite**: ビルドツール
-
-## ライセンス
+## License
 
 MIT
 
-## 開発者向け情報
+## For Developers
 
-### 実行モード
+### Execution Modes
 
-- 開発: `yarn dev`（Vite: http://localhost:3001, BrowserRouter）
-- 本番: `yarn build && yarn start`（HashRouter で `dist/renderer/index.html` を読み込み）
+- Development: `yarn dev` (Vite: <http://localhost:3001>, BrowserRouter)
+- Production: `yarn build && yarn start` (HashRouter loading `dist/renderer/index.html`)
 
-### データファイルの保存場所
+### Data Files Location
 
-すべてのデータは `~/.mcpm` ディレクトリに保存されます：
+All app data is stored under `~/.mcpm`.
 
-- **設定ファイル**: `~/.mcpm/config.json`
-- **ログファイル**: `~/.mcpm/logs/`
+- Config: `~/.mcpm/config.json`
+- Logs: `~/.mcpm/logs/`
 
-#### ファイル構造
-```
+Example:
+
+```text
 ~/.mcpm/
-├── config.json      # 設定とMCPサーバー定義
-└── logs/            # ログファイル
+├── config.json      # App settings and MCP server definitions
+└── logs/
     ├── {server_id}_YYYYMMDD_stdout.log
     └── {server_id}_YYYYMMDD_stderr.log
 ```
 
-#### config.json の形式
+### config.json
 
-MCP Client標準形式に準拠した設定ファイル：
+The app loads/creates `~/.mcpm/config.json` based on `DEFAULT_CONFIG` in `shared/constants.ts`.
+
+#### Structure
 
 ```json
 {
@@ -127,12 +113,12 @@ MCP Client標準形式に準拠した設定ファイル：
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "env": {
-        "NODE_ENV": "production"
-      },
+      "env": { "NODE_ENV": "production" },
       "displayName": "Sequential Thinking Server",
       "platform": "host",
-      "autoStart": true
+      "autoStart": true,
+      "autoRestartOnError": true,
+      "useAuthProxy": false
     },
     "file-server": {
       "command": "python",
@@ -147,28 +133,46 @@ MCP Client標準形式に準拠した設定ファイル：
     "language": "ja",
     "darkMode": false,
     "logDirectory": "~/.mcpm/logs",
-    "logRetentionDays": 7
+    "logRetentionDays": 7,
+    "restartDelayMs": 5000,
+    "successfulStartThresholdMs": 10000,
+    "ngrokAuthToken": "",
+    "ngrokMetadataName": "MCP Server Manager",
+    "ngrokPorts": "3000,4000",
+    "ngrokAutoStart": false,
+    "oidcProviderName": "Auth0",
+    "oidcConfigurationUrl": "",
+    "oidcClientId": "",
+    "oidcClientSecret": "",
+    "oidcAllowedUsers": "",
+    "oidcAllowedUsersGlob": ""
   }
 }
 ```
 
-#### MCPサーバー設定項目
+#### MCP Server Fields
 
-- **command**: 実行コマンド（必須）
-- **args**: コマンド引数の配列（必須）
-- **env**: 環境変数（オプション）
-- **displayName**: 表示名（オプション）
-- **platform**: 実行環境 ("host" | "wsl")
-- **wslDistribution**: WSLディストリビューション名（WSL利用時）
-- **autoStart**: アプリ起動時の自動実行
+- command: executable command
+- args: argument list
+- env: environment variables
+- displayName: display name
+- platform: execution environment ("host" | "wsl")
+- wslDistribution: WSL distro name (when `platform: "wsl"`)
+- autoStart: start with the app
+- autoRestartOnError: auto-restart on abnormal exit (conditionally)
+- useAuthProxy: wrap with mcp-auth-proxy
+- authProxyListenPort / authProxyExternalUrl: required when using Auth Proxy
 
-### WSL について（Windows）
-- アプリ起動時にWSLの有無を検出します（`wsl.exe -l -v` を使用）
-- ディストリビューション一覧は名前・状態・バージョンを抽出し、既定のものは `(既定)` と表示
-- 表示が想定と異なる場合は `wsl.exe -l -v` の結果に依存します
+### WSL on Windows
 
-### Windows用アイコンの作成
+- On startup the app detects WSL and lists distributions via `wsl.exe -l -q/-v` (default and running states included)
+
+### Create Windows Icon
 
 ```exec
 magick public/icon.png -define icon:auto-resize=256,128,96,64,48,32,24,16 public/icon.ico
 ```
+
+## Notes
+
+- ngrok may fail to start when you hit the concurrent session limit. Stop other agents (CLI/Desktop) or disconnect agents from the dashboard.
