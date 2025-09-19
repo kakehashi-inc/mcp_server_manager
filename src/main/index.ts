@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { initializeIPC } from './ipc';
@@ -8,6 +8,7 @@ import { LogManager } from './services/LogManager';
 import { NgrokMultiTunnelManager } from './services/NgrokMultiTunnelManager';
 
 let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
 let processManager: ProcessManager;
 let configManager: ConfigManager;
 let logManager: LogManager;
@@ -15,12 +16,87 @@ let ngrokManager: NgrokMultiTunnelManager;
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
+// Enforce single instance
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+    app.quit();
+    process.exit(0);
+} else {
+    app.on('second-instance', (_event, _argv, _workingDirectory) => {
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) {
+                mainWindow.restore();
+            }
+            if (!mainWindow.isVisible()) {
+                mainWindow.show();
+            }
+            mainWindow.focus();
+        }
+    });
+}
+
+function resolveIconPath(): string | undefined {
+    const pngPath = path.join(__dirname, '../../public/icon.png');
+    if (fs.existsSync(pngPath)) return pngPath;
+
+    const svgPath = path.join(__dirname, '../../public/icon.ico');
+    if (fs.existsSync(svgPath)) return svgPath;
+
+    return undefined;
+}
+
+function showMainWindow() {
+    if (!mainWindow) {
+        createWindow();
+        return;
+    }
+    if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+    }
+    if (!mainWindow.isVisible()) {
+        mainWindow.show();
+    }
+    mainWindow.focus();
+}
+
+function createTray() {
+    const iconPath = resolveIconPath();
+    if (!iconPath) {
+        tray = null;
+        return;
+    }
+    tray = new Tray(iconPath);
+    const language = configManager?.getSettings().language || 'ja';
+    const labels = language === 'ja' ? { open: '開く', quit: '終了' } : { open: 'Open', quit: 'Quit' };
+    const menu = Menu.buildFromTemplate([
+        {
+            label: labels.open,
+            click: () => showMainWindow(),
+        },
+        { type: 'separator' },
+        {
+            label: labels.quit,
+            click: () => app.quit(),
+        },
+    ]);
+    tray.setToolTip('MCP Server Manager');
+    tray.setContextMenu(menu);
+    tray.on('right-click', () => {
+        tray?.popUpContextMenu();
+    });
+    tray.on('double-click', () => {
+        showMainWindow();
+    });
+}
+
 function createWindow() {
+    const settings = configManager.getSettings();
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         minWidth: 800,
         minHeight: 600,
+        show: settings.showWindowOnStartup !== false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -29,44 +105,74 @@ function createWindow() {
         },
         frame: false,
         titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-        icon: ((): string | undefined => {
-            const pngPath = path.join(__dirname, '../../public/icon.png');
-            const svgPath = path.join(__dirname, '../../public/icon.svg');
-            if (fs.existsSync(pngPath)) return pngPath;
-            if (fs.existsSync(svgPath)) return svgPath;
-            return undefined;
-        })(),
+        icon: resolveIconPath(),
     });
 
     if (isDev) {
         mainWindow.loadURL('http://localhost:3001');
-        mainWindow.webContents.openDevTools();
+        // Ensure DevTools are visible in development
+        try {
+            mainWindow.webContents.openDevTools({ mode: 'detach' });
+        } catch {}
+        // Keyboard shortcuts to toggle DevTools without menu
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            const isToggleCombo =
+                (input.key?.toLowerCase?.() === 'i' && (input.control || input.meta) && input.shift) ||
+                input.key === 'F12';
+            if (isToggleCombo) {
+                event.preventDefault();
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.webContents.toggleDevTools();
+                }
+            }
+        });
     } else {
         mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
     }
+
+    mainWindow.on('close', e => {
+        // Hide to tray instead of quitting when user closes the window
+        if (!isQuitting) {
+            e.preventDefault();
+            if (tray) {
+                mainWindow?.hide();
+            } else {
+                // If tray isn't available, minimize instead of closing
+                mainWindow?.minimize();
+            }
+            return;
+        }
+    });
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 
-    // Custom title bar handlers for Windows/Linux
-    if (process.platform !== 'darwin') {
-        ipcMain.on('app:minimize', () => {
-            mainWindow?.minimize();
-        });
+    // Custom title bar handlers
+    ipcMain.on('app:minimize', () => {
+        mainWindow?.minimize();
+    });
 
-        ipcMain.on('app:maximize', () => {
-            if (mainWindow?.isMaximized()) {
-                mainWindow.restore();
+    ipcMain.on('app:maximize', () => {
+        if (mainWindow?.isMaximized()) {
+            mainWindow.restore();
+        } else {
+            mainWindow?.maximize();
+        }
+    });
+
+    ipcMain.on('app:quit', () => {
+        // Custom title bar close button should hide to tray
+        if (!isQuitting) {
+            if (tray) {
+                mainWindow?.hide();
             } else {
-                mainWindow?.maximize();
+                mainWindow?.minimize();
             }
-        });
-
-        ipcMain.on('app:quit', () => {
-            app.quit();
-        });
-    }
+            return;
+        }
+        app.quit();
+    });
 }
 
 async function initializeServices() {
@@ -105,6 +211,7 @@ async function initializeServices() {
 
 app.whenReady().then(async () => {
     await initializeServices();
+    createTray();
     createWindow();
 
     app.on('activate', () => {
@@ -112,12 +219,6 @@ app.whenReady().then(async () => {
             createWindow();
         }
     });
-});
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
 });
 
 let isQuitting = false;
@@ -133,6 +234,9 @@ app.on('before-quit', async e => {
     } finally {
         processManager.stopMonitoring();
         logManager.stopRotation();
+        try {
+            tray?.destroy();
+        } catch {}
         isQuitting = true;
         app.exit(0);
     }

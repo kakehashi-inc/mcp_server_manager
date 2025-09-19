@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP Server Process Manager GUI",
   "main": "dist/main/index.js",
   "engines": {
@@ -16,10 +16,13 @@
     "dev:electron": "wait-on dist/main/index.js http://localhost:3001 && electron . --dev",
     "build": "tsc -p tsconfig.main.json && vite build",
     "start": "electron .",
-    "dist": "yarn build && electron-builder",
-    "dist:win": "yarn build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false ELECTRON_BUILDER_DISABLE_CODE_SIGNING=true electron-builder --win",
-    "dist:mac": "yarn build && electron-builder --mac",
-    "dist:linux": "yarn build && electron-builder --linux"
+    "dist:win": "yarn build && electron-builder --win --publish=never",
+    "dist:mac": "yarn build && electron-builder --mac --publish=never",
+    "dist:linux": "yarn build && electron-builder --linux --publish=never",
+    "release:win": "yarn build && electron-builder --win --publish=always",
+    "release:mac": "yarn build && electron-builder --mac --publish=always",
+    "release:linux": "yarn build && electron-builder --linux --publish=always",
+    "clean": "rimraf dist release node_modules/.cache"
   },
   "keywords": [
     "mcp",
@@ -43,6 +46,7 @@
     "eslint": "^9.35.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
     "wait-on": "^8.0.4"

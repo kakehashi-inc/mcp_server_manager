@@ -1,6 +1,6 @@
 export default {
     app: {
-        title: 'MCP サーバーマネージャー',
+        title: 'MCP Server Manager',
     },
     process: {
         title: 'プロセス管理',
@@ -55,6 +55,7 @@ export default {
         logs: 'ログ',
         language: '言語',
         darkMode: 'ダークモード',
+        showWindowOnStartup: '起動時にウィンドウを表示',
         logDirectory: 'ログディレクトリ',
         logRetentionDays: 'ログ保持日数',
         restartDelayMs: '再起動までの待ち時間 (ms)',
@@ -111,5 +112,10 @@ export default {
         info: '情報',
         copy: 'コピー',
         copied: 'コピーしました',
+    },
+    tray: {
+        open: '開く',
+        quit: '終了',
+        tooltip: 'MCP Server Manager',
     },
 };

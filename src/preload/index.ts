@@ -18,6 +18,7 @@ const IPC_CHANNELS = {
     LOG_READ: 'log:read',
     LOG_CLEAR: 'log:clear',
     SYSTEM_INFO: 'system:info',
+    APP_VERSION: 'system:app-version',
     APP_QUIT: 'app:quit',
     APP_MINIMIZE: 'app:minimize',
     APP_MAXIMIZE: 'app:maximize',
@@ -73,6 +74,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // System
     systemAPI: {
         getInfo: () => ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_INFO),
+        getAppVersion: () => ipcRenderer.invoke(IPC_CHANNELS.APP_VERSION),
     },
 
     // Ngrok
@@ -124,6 +126,7 @@ declare global {
             };
             systemAPI: {
                 getInfo: () => Promise<any>;
+                getAppVersion: () => Promise<string>;
             };
             ngrokAPI: {
                 start: () => Promise<any[]>;

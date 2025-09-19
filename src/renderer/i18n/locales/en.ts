@@ -55,6 +55,7 @@ export default {
         logs: 'Logs',
         language: 'Language',
         darkMode: 'Dark Mode',
+        showWindowOnStartup: 'Show window on startup',
         logDirectory: 'Log Directory',
         logRetentionDays: 'Log Retention Days',
         restartDelayMs: 'Restart delay (ms)',
@@ -111,5 +112,10 @@ export default {
         info: 'Info',
         copy: 'Copy',
         copied: 'Copied to clipboard',
+    },
+    tray: {
+        open: 'Open',
+        quit: 'Quit',
+        tooltip: 'MCP Server Manager',
     },
 };

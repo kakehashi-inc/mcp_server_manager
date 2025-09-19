@@ -45,6 +45,7 @@ export interface AppSettings {
     logRetentionDays: number;
     restartDelayMs: number;
     successfulStartThresholdMs: number;
+    showWindowOnStartup?: boolean;
     // Ngrok settings
     ngrokAuthToken?: string;
     ngrokMetadataName?: string; // metadataに渡す識別名
@@ -104,6 +105,7 @@ export const IPC_CHANNELS = {
 
     // System
     SYSTEM_INFO: 'system:info',
+    APP_VERSION: 'system:app-version',
     APP_QUIT: 'app:quit',
     APP_MINIMIZE: 'app:minimize',
     APP_MAXIMIZE: 'app:maximize',

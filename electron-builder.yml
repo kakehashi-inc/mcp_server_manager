@@ -3,7 +3,28 @@ productName: MCP Server Manager
 directories:
   output: release
   buildResources: build
-artifactName: "mcpm-${os}-${arch}-${version}.${ext}"
+artifactName: "mcpm-${version}-${os}-${arch}.${ext}"
+portable:
+  artifactName: "mcpm-${version}-${os}-${arch}-portable.${ext}"
+publish:
+  provider: github
+  owner: kakehashi-inc
+  repo: https://github.com/kakehashi-inc/mcp_server_manager.git
+  releaseType: release
+releaseInfo:
+  releaseName: "v${version}"
+  releaseNotes: |
+    ## Installation Notes
+
+    ### Windows Users
+    This application is not signed with a Windows certificate to keep the project free.
+    If Windows shows a warning, click "More info" → "Run anyway".
+
+    ### macOS Users
+    The application is properly signed and notarized.
+
+    ### Linux Users
+    Choose your preferred package format.
 
 files:
   - dist/**/*
@@ -24,13 +45,19 @@ win:
       arch:
         - x64
         - arm64
+    - target: portable
+      arch:
+        - x64
+        - arm64
 
 nsis:
   shortcutName: MCP Server Manager
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
-  deleteAppDataOnUninstall: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: true
 
 mac:
   category: public.app-category.developer-tools
@@ -66,9 +93,3 @@ linux:
       Name: MCP Server Manager
       Comment: Manage MCP server processes
       Categories: Development;
-
-#publish:
-#  provider: github
-#  releaseType: release
-
-publish: null

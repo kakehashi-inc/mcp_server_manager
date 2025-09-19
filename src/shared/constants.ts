@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG: AppConfig = {
         logRetentionDays: 7,
         restartDelayMs: 5000,
         successfulStartThresholdMs: 10000,
+        showWindowOnStartup: true,
         ngrokAuthToken: '',
         ngrokMetadataName: 'MCP Server Manager',
         ngrokPorts: '',

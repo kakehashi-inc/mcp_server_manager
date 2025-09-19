@@ -85,6 +85,21 @@ const SettingsPage: React.FC = () => {
                     <FormControlLabel
                         control={
                             <Switch
+                                checked={localSettings.showWindowOnStartup !== false}
+                                onChange={e =>
+                                    setLocalSettings({
+                                        ...localSettings,
+                                        showWindowOnStartup: e.target.checked,
+                                    })
+                                }
+                            />
+                        }
+                        label={t('settings.showWindowOnStartup')}
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Switch
                                 checked={localSettings.darkMode}
                                 onChange={e => setLocalSettings({ ...localSettings, darkMode: e.target.checked })}
                             />

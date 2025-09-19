@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
@@ -34,6 +34,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         window.electronAPI.windowAPI.close();
     };
 
+    const [appVersion, setAppVersion] = useState<string>('');
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const v = await window.electronAPI.systemAPI.getAppVersion();
+                if (mounted) setAppVersion(v);
+            } catch {}
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
     return (
         <Box sx={{ display: 'flex', height: '100vh' }}>
             <AppBar
@@ -45,8 +60,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }}
             >
                 <Toolbar>
-                    <Typography variant='h6' noWrap component='div' sx={{ flexGrow: 1 }}>
-                        {t('app.title')}
+                    <Typography
+                        variant='h6'
+                        noWrap
+                        component='div'
+                        sx={{ flexGrow: 1, display: 'flex', alignItems: 'baseline', gap: 1 }}
+                    >
+                        <Box component='span'>{t('app.title')}</Box>
+                        {appVersion ? (
+                            <Typography component='span' variant='caption' sx={{ color: 'text.secondary' }}>
+                                v{appVersion}
+                            </Typography>
+                        ) : null}
                     </Typography>
                     <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2, display: 'flex', gap: 1 }}>
                         {[

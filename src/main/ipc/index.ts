@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import { IPC_CHANNELS } from '../../shared/types';
 import { ProcessManager } from '../services/ProcessManager';
 import { ConfigManager } from '../services/ConfigManager';
@@ -80,6 +80,9 @@ export function initializeIPC(
     // System
     ipcMain.handle(IPC_CHANNELS.SYSTEM_INFO, async () => {
         return await SystemUtils.getSystemInfo();
+    });
+    ipcMain.handle(IPC_CHANNELS.APP_VERSION, async () => {
+        return app.getVersion();
     });
 
     // Ngrok
