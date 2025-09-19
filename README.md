@@ -62,7 +62,7 @@ When building or running unsigned local releases on Windows, enable Developer Mo
 2. Turn on "Developer Mode"
 3. Reboot if Windows asks you to
 
-Note: The app is not code-signed on Windows to keep the project free. SmartScreen may show a warning; click "More info" → "Run anyway".
+Note: The app is not code-signed on Windows. SmartScreen may show a warning; click "More info" → "Run anyway".
 
 ## Project Structure (excerpt)
 
