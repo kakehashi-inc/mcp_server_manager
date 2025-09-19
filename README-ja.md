@@ -40,6 +40,11 @@ yarn install
 yarn dev
 ```
 
+開発時のDevTools:
+
+- DevTools はデタッチ表示で自動的に開きます
+- F12 または Ctrl+Shift+I（macOSは Cmd+Option+I）でトグル可能
+
 ## ビルド/配布
 
 - 全プラットフォーム: `yarn dist`
@@ -48,6 +53,16 @@ yarn dev
 - Linux: `yarn dist:linux`
 
 開発時は BrowserRouter で `<http://localhost:3001>` を、配布ビルドでは HashRouter で `dist/renderer/index.html` を読み込みます。
+
+### Windows 事前準備: 開発者モード
+
+Windows で署名なしのローカルビルド/配布物を実行・テストする場合は、OSの開発者モードを有効にしてください。
+
+1. 設定 → プライバシーとセキュリティ → 開発者向け
+2. 「開発者モード」をオンにする
+3. 必要に応じて再起動
+
+注記: 本プロジェクトは Windows ではコード署名を行っていません（無料を維持するため）。SmartScreen が警告を表示する場合は「詳細情報」→「実行」を選択してください。
 
 ## プロジェクト構造 (抜粋)
 
@@ -136,6 +151,7 @@ MIT
     "logRetentionDays": 7,
     "restartDelayMs": 5000,
     "successfulStartThresholdMs": 10000,
+    "showWindowOnStartup": true,
     "ngrokAuthToken": "",
     "ngrokMetadataName": "MCP Server Manager",
     "ngrokPorts": "3000,4000",
@@ -176,3 +192,4 @@ magick public/icon.png -define icon:auto-resize=256,128,96,64,48,32,24,16 public
 ## 補足
 
 - ngrokの同時セッション上限に達すると起動に失敗します。CLI/デスクトップ、またはダッシュボードの Agents で不要なセッションを切断してください。
+- 「×」で閉じるとアプリは終了せずトレイへ格納されます。終了はトレイメニューの「終了」から行ってください。

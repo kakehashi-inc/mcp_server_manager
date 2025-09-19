@@ -40,6 +40,11 @@ yarn install
 yarn dev
 ```
 
+DevTools in development:
+
+- DevTools open in detached mode automatically
+- Toggle with F12 or Ctrl+Shift+I (Cmd+Option+I on macOS)
+
 ## Build/Distribute
 
 - All platforms: `yarn dist`
@@ -48,6 +53,16 @@ yarn dev
 - Linux: `yarn dist:linux`
 
 In development the app uses BrowserRouter with `<http://localhost:3001>`, and in production it uses HashRouter to load `dist/renderer/index.html`.
+
+### Windows prerequisite: Developer Mode
+
+When building or running unsigned local releases on Windows, enable Developer Mode:
+
+1. Open Settings → Privacy & security → For developers
+2. Turn on "Developer Mode"
+3. Reboot if Windows asks you to
+
+Note: The app is not code-signed on Windows to keep the project free. SmartScreen may show a warning; click "More info" → "Run anyway".
 
 ## Project Structure (excerpt)
 
@@ -136,6 +151,7 @@ The app loads/creates `~/.mcpm/config.json` based on `DEFAULT_CONFIG` in `shared
     "logRetentionDays": 7,
     "restartDelayMs": 5000,
     "successfulStartThresholdMs": 10000,
+    "showWindowOnStartup": true,
     "ngrokAuthToken": "",
     "ngrokMetadataName": "MCP Server Manager",
     "ngrokPorts": "3000,4000",
@@ -176,3 +192,4 @@ magick public/icon.png -define icon:auto-resize=256,128,96,64,48,32,24,16 public
 ## Notes
 
 - ngrok may fail to start when you hit the concurrent session limit. Stop other agents (CLI/Desktop) or disconnect agents from the dashboard.
+- Close button behavior: the window hides to tray instead of quitting. Use the tray menu "Quit" to exit.
