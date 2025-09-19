@@ -14,17 +14,13 @@ publish:
 releaseInfo:
   releaseName: "v${version}"
   releaseNotes: |
-    ## Installation Notes
+    ## New Features
 
-    ### Windows Users
-    This application is not signed with a Windows certificate to keep the project free.
-    If Windows shows a warning, click "More info" → "Run anyway".
+    - nothing
 
-    ### macOS Users
-    The application is properly signed and notarized.
+    ## Bug Fixes
 
-    ### Linux Users
-    Choose your preferred package format.
+    - nothing
 
 files:
   - dist/**/*
