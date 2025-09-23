@@ -161,9 +161,9 @@ function createWindow() {
         }
     });
 
-    ipcMain.on('app:quit', () => {
+    ipcMain.on('app:quit', (_e, forceQuit?: boolean) => {
         // Custom title bar close button should hide to tray
-        if (!isQuitting) {
+        if (!isQuitting && !forceQuit) {
             if (tray) {
                 mainWindow?.hide();
             } else {

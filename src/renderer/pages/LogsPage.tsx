@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, IconButton } from '@mui/material';
@@ -22,6 +22,7 @@ const LogsPage: React.FC = () => {
     const [logLines, setLogLines] = useState<string[]>([]);
     const [lineCount, setLineCount] = useState<number>(100);
     const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+    const logContainerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (processId) {
@@ -57,6 +58,14 @@ const LogsPage: React.FC = () => {
         }
     };
 
+    // Scroll to bottom when logs change or target/process changes
+    useEffect(() => {
+        const el = logContainerRef.current;
+        if (el) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }, [logLines, selectedProcessId, logType]);
+
     const handleClearLogs = async () => {
         if (!selectedProcessId) return;
 
@@ -79,7 +88,7 @@ const LogsPage: React.FC = () => {
     const selectedServer = servers.find(s => s.id === selectedProcessId);
 
     return (
-        <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <IconButton onClick={() => navigate('/processes')} title={t('common.close')}>
                     <ArrowBackIcon />
@@ -139,10 +148,11 @@ const LogsPage: React.FC = () => {
                 sx={{
                     p: 2,
                     bgcolor: 'grey.900',
-                    minHeight: 400,
-                    maxHeight: 600,
+                    flexGrow: 1,
+                    minHeight: 0,
                     overflow: 'auto',
                 }}
+                ref={logContainerRef}
             >
                 {selectedServer ? (
                     logLines.length > 0 ? (

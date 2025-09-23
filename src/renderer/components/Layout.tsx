@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Divider, ListItemIcon } from '@mui/material';
 import {
     Memory as ProcessIcon,
     Settings as SettingsIcon,
@@ -9,6 +9,8 @@ import {
     Minimize as MinimizeIcon,
     CropSquare as MaximizeIcon,
     Close as CloseIcon,
+    Menu as MenuIcon,
+    PowerSettingsNew as PowerIcon,
 } from '@mui/icons-material';
 
 const appBarHeight = 64;
@@ -33,6 +35,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const handleClose = () => {
         window.electronAPI.windowAPI.close();
     };
+
+    const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+    const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchorEl(e.currentTarget);
+    const closeMenu = () => setMenuAnchorEl(null);
 
     const [appVersion, setAppVersion] = useState<string>('');
 
@@ -112,6 +118,63 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </Box>
                     {
                         <Box sx={{ WebkitAppRegion: 'no-drag' }}>
+                            <IconButton size='small' edge='end' color='inherit' onClick={openMenu} sx={{ mr: 1 }}>
+                                <MenuIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={menuAnchorEl}
+                                open={Boolean(menuAnchorEl)}
+                                onClose={closeMenu}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            >
+                                <MenuItem
+                                    onClick={() => {
+                                        closeMenu();
+                                        navigate('/processes');
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <ProcessIcon fontSize='small' />
+                                    </ListItemIcon>
+                                    {t('process.title')}
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => {
+                                        closeMenu();
+                                        navigate('/ngrok');
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <NgrokIcon fontSize='small' />
+                                    </ListItemIcon>
+                                    {t('ngrok.title')}
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => {
+                                        closeMenu();
+                                        navigate('/settings');
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <SettingsIcon fontSize='small' />
+                                    </ListItemIcon>
+                                    {t('settings.title')}
+                                </MenuItem>
+                                <Divider />
+                                <MenuItem
+                                    onClick={() => {
+                                        closeMenu();
+                                        // Quit app (same behavior as tray Quit)
+                                        window.electronAPI.windowAPI.close(true);
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <PowerIcon fontSize='small' />
+                                    </ListItemIcon>
+                                    {t('tray.quit')}
+                                </MenuItem>
+                            </Menu>
                             <IconButton size='small' edge='end' color='inherit' onClick={handleMinimize}>
                                 <MinimizeIcon />
                             </IconButton>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '../store/useStore';
 import {
@@ -35,6 +35,7 @@ const NgrokPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState<boolean>(false);
     const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+    const logContainerRef = useRef<HTMLDivElement | null>(null);
 
     const handleCopy = (text: string) => {
         if (!text) return;
@@ -62,6 +63,14 @@ const NgrokPage: React.FC = () => {
             setLogs([]);
         }
     };
+
+    // Scroll to bottom when logs change
+    useEffect(() => {
+        const el = logContainerRef.current;
+        if (el) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }, [logs]);
 
     useEffect(() => {
         refresh();
@@ -232,6 +241,7 @@ const NgrokPage: React.FC = () => {
                         overflow: 'auto',
                         whiteSpace: 'pre',
                     }}
+                    ref={logContainerRef}
                 >
                     {logs.join('\n')}
                 </Box>

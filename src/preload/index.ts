@@ -90,7 +90,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     windowAPI: {
         minimize: () => ipcRenderer.send(IPC_CHANNELS.APP_MINIMIZE),
         maximize: () => ipcRenderer.send(IPC_CHANNELS.APP_MAXIMIZE),
-        close: () => ipcRenderer.send(IPC_CHANNELS.APP_QUIT),
+        close: (force?: boolean) => ipcRenderer.send(IPC_CHANNELS.APP_QUIT, !!force),
     },
 });
 
@@ -138,7 +138,7 @@ declare global {
             windowAPI: {
                 minimize: () => void;
                 maximize: () => void;
-                close: () => void;
+                close: (force?: boolean) => void;
             };
         };
     }
