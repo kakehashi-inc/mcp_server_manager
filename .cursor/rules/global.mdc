@@ -43,78 +43,21 @@ Loop:
 - Consistency: The user interface must adhere to a consistent design system—color tokens, typography, spacing, and components must be unified.
 - Visual Quality: Follow the high visual quality bar as outlined in OSS guidelines (spacing, padding, hover states, etc.)
 </guiding_principles>
-<backend_stack_defaults>
-- Framework: Laravel: 12 (PHP >=8.2)
-</backend_stack_defaults>
 <frontend_stack_defaults>
-- Coding: TypeScript 5, Vue 3, SCSS (sass 1.69.7)
-- Styling: MDB UI Kit 8 (Bootstrap 5 compatible)
-- Icons: Font Awesome 6
+- Coding: TypeScript 5
+- Styling: @mui/material
+- Icons: @mui/icons-material
 </frontend_stack_defaults>
 <developper_stack_defaults>
 - Packaging: yarn 4 (Node.js 22)
-- Builder: laravel-mix 6 (Webpack 5)
-- PHP Linter: larastan 3 (PHPStan 2), PHPMD 2
-- PHP Fixer: PHP CS Fixer 3
+- Builder: electron-builder
 - TS/JS Linter: ESLint 9
 - TS/JS Fixer: Prettier 3
 </developper_stack_defaults>
-<directory_structure>
-- Standard directory structure of Laravel 12
-
-Additional directories:
-```text
-root/
-├── app/
-│   ├── Charts/             # Chart rendering classes
-│   ├── Helpers/            # Helper functions
-│   ├── Mail/               # Mail generation classes
-│   ├── Services/           # Business logic
-│   ├── Traits/             # Traits
-│   ├── Transformers/       # API response transformer classes
-│   └── Utils/              # Utility functions
-├── Archive/                # **Do not modify** Archive files
-├── bootstrap/              # **Do not modify** Bootstrap
-├── common/                 # Common subprojects
-│   ├── Enums               # Common enumerations
-│   ├── Jobs                # Common job classes
-│   ├── Models              # Common models
-│   ├── Providers           # Common providers
-│   ├── Services            # Common business logic
-│   ├── Traits              # Common traits
-│   ├── Transformers        # Common API response transformer classes
-│   └── Utils               # Common utility functions
-├── config/                 # **Do not modify** Config files
-├── docker/                 # **Do not modify** Docker related
-├── Documents/              # Developer documentation
-├── external_node/          # **Do not modify** External node modules
-├── lang/                   # Language directories
-│   ├── en/                 # English language files
-│   └── ja/                 # Japanese language files
-├── resources/
-│   ├── s3/                 # **Do not modify** AWS S3 upload files
-│   ├── scss/               # SCSS files
-│   │   ├── app/            # Application-specific styles
-│   │   └── modules/        # Mixins and definitions
-│   ├── static/             # **Do not modify** Static files for public copy
-│   ├── ts/                 # TypeScript source
-│   │   ├── @types/         # Type definitions
-│   │   ├── app/            # Application-specific scripts
-│   │   ├── common/         # **Do not modify** Common modules
-│   │   ├── modules/        # Feature modules
-│   │   └── utils/          # Utility functions
-│   ├── views/
-│   │   └── emails/         # Email templates
-│   │       ├── en/         # English email templates
-│   │       └── ja/         # Japanese email templates
-│   └── vue/                # Vue.js components
-└── storage/                # **Do not modify** Storage directory
-```
-</directory_structure>
 </code_editing_rules>
 
 <project_details>
 <project_description>
-[readme.md](readme.md)
+[README.md](README.md)
 </project_description>
 </project_details>
