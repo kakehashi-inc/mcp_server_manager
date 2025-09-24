@@ -8,6 +8,7 @@ import ProcessesPage from './pages/ProcessesPage';
 import SettingsPage from './pages/SettingsPage';
 import LogsPage from './pages/LogsPage';
 import NgrokPage from './pages/NgrokPage';
+import HttpsProxyPage from './pages/HttpsProxyPage';
 
 function App() {
     const { i18n } = useTranslation();
@@ -77,6 +78,7 @@ function App() {
                             <Route path='/settings' element={<SettingsPage />} />
                             <Route path='/logs/:processId?' element={<LogsPage />} />
                             <Route path='/ngrok' element={<NgrokPage />} />
+                            <Route path='/https-proxy' element={<HttpsProxyPage />} />
                         </Routes>
                     </Layout>
                 </BrowserRouter>
@@ -89,6 +91,7 @@ function App() {
                             <Route path='/settings' element={<SettingsPage />} />
                             <Route path='/logs/:processId?' element={<LogsPage />} />
                             <Route path='/ngrok' element={<NgrokPage />} />
+                            <Route path='/https-proxy' element={<HttpsProxyPage />} />
                         </Routes>
                     </Layout>
                 </HashRouter>

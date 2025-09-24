@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-manager",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "MCP Server Process Manager GUI",
   "main": "dist/main/index.js",
   "engines": {
@@ -33,6 +33,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/express-http-proxy": "^1.6.7",
     "@types/node": "^22.18.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
@@ -57,11 +59,14 @@
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@ngrok/ngrok": "^1.5.2",
+    "express": "^5.1.0",
+    "express-http-proxy": "^2.1.2",
     "i18next": "^25.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-i18next": "^15.7.3",
     "react-router-dom": "^7.8.2",
+    "selfsigned": "^2.4.1",
     "zustand": "^5.0.8"
   }
 }

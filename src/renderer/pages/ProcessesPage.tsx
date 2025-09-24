@@ -89,7 +89,7 @@ const ProcessesPage: React.FC = () => {
     const getStatusChip = (serverId: string) => {
         const status = processStatuses.get(serverId);
         if (!status) {
-            return <Chip label={t('process.status.stopped')} color='default' size='small' />;
+            return <Chip label={t('common.stopped')} color='default' size='small' />;
         }
 
         const colorMap = {
@@ -98,7 +98,8 @@ const ProcessesPage: React.FC = () => {
             error: 'error' as const,
         };
 
-        return <Chip label={t(`process.status.${status.status}`)} color={colorMap[status.status]} size='small' />;
+        const labelKey = status.status === 'error' ? 'common.error' : `common.${status.status}`;
+        return <Chip label={t(labelKey)} color={colorMap[status.status]} size='small' />;
     };
 
     const getDisplayName = (server: { id: string; config: MCPServerConfig }) => {
@@ -179,12 +180,12 @@ const ProcessesPage: React.FC = () => {
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.command')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.platform')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>Auth proxy</TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('process.fields.status')}</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>{t('common.status')}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }} align='center'>
                                 {t('process.fields.autoStart')}
                             </TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }} align='right'>
-                                {t('process.fields.actions')}
+                                {t('common.actions')}
                             </TableCell>
                         </TableRow>
                     </TableHead>
@@ -231,7 +232,7 @@ const ProcessesPage: React.FC = () => {
                                         />
                                     </TableCell>
                                     <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
-                                        <Tooltip title={isRunning ? t('process.stop') : t('process.start')}>
+                                        <Tooltip title={isRunning ? t('common.stop') : t('common.start')}>
                                             <IconButton
                                                 size='small'
                                                 onClick={() =>
@@ -246,7 +247,7 @@ const ProcessesPage: React.FC = () => {
                                                 <LogIcon />
                                             </IconButton>
                                         </Tooltip>
-                                        <Tooltip title={t('process.edit')}>
+                                        <Tooltip title={t('common.edit')}>
                                             <IconButton
                                                 size='small'
                                                 onClick={() => handleEdit(server)}
@@ -255,7 +256,7 @@ const ProcessesPage: React.FC = () => {
                                                 <EditIcon />
                                             </IconButton>
                                         </Tooltip>
-                                        <Tooltip title={t('process.delete')}>
+                                        <Tooltip title={t('common.delete')}>
                                             <IconButton
                                                 size='small'
                                                 onClick={() => handleDelete(server.id)}

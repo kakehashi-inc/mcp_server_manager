@@ -27,6 +27,18 @@ const IPC_CHANNELS = {
     NGROK_STATUS: 'ngrok:status',
     NGROK_LOG_READ: 'ngrok:log:read',
     NGROK_LOG_CLEAR: 'ngrok:log:clear',
+
+    // HTTPS Proxy
+    HTTPS_PROXY_LIST: 'https-proxy:list',
+    HTTPS_PROXY_CREATE: 'https-proxy:create',
+    HTTPS_PROXY_UPDATE: 'https-proxy:update',
+    HTTPS_PROXY_DELETE: 'https-proxy:delete',
+    HTTPS_PROXY_START: 'https-proxy:start',
+    HTTPS_PROXY_STOP: 'https-proxy:stop',
+    HTTPS_PROXY_STATUS: 'https-proxy:status',
+    HTTPS_PROXY_REGENERATE_CERT: 'https-proxy:regenerate-cert',
+    HTTPS_PROXY_LOG_READ: 'https-proxy:log:read',
+    HTTPS_PROXY_LOG_CLEAR: 'https-proxy:log:clear',
 } as const;
 
 // Expose protected methods that allow the renderer process to use
@@ -86,6 +98,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
         clearLogs: () => ipcRenderer.invoke(IPC_CHANNELS.NGROK_LOG_CLEAR),
     },
 
+    // HTTPS Proxy
+    httpsProxyAPI: {
+        list: () => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_LIST),
+        status: () => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_STATUS),
+        create: (hostname: string, cfg: any) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_CREATE, hostname, cfg),
+        update: (hostname: string, cfg: any) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_UPDATE, hostname, cfg),
+        remove: (hostname: string) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_DELETE, hostname),
+        start: (hostname: string) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_START, hostname),
+        stop: (hostname: string) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_STOP, hostname),
+        regenerateCert: (hostname: string) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_REGENERATE_CERT, hostname),
+        readLogs: (hostname: string, lines?: number) =>
+            ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_LOG_READ, hostname, lines),
+        clearLogs: (hostname: string) => ipcRenderer.invoke(IPC_CHANNELS.HTTPS_PROXY_LOG_CLEAR, hostname),
+    },
+
     // Window controls
     windowAPI: {
         minimize: () => ipcRenderer.send(IPC_CHANNELS.APP_MINIMIZE),
@@ -134,6 +161,18 @@ declare global {
                 status: () => Promise<any[]>;
                 readLogs: (lines?: number) => Promise<string[]>;
                 clearLogs: () => Promise<void>;
+            };
+            httpsProxyAPI: {
+                list: () => Promise<any>;
+                status: () => Promise<any[]>;
+                create: (hostname: string, cfg: any) => Promise<boolean>;
+                update: (hostname: string, cfg: any) => Promise<boolean>;
+                remove: (hostname: string) => Promise<boolean>;
+                start: (hostname: string) => Promise<any>;
+                stop: (hostname: string) => Promise<boolean>;
+                regenerateCert: (hostname: string) => Promise<any>;
+                readLogs: (hostname: string, lines?: number) => Promise<string[]>;
+                clearLogs: (hostname: string) => Promise<void>;
             };
             windowAPI: {
                 minimize: () => void;

@@ -52,3 +52,8 @@ export const getAppDataPath = () => {
 export const getConfigPath = () => {
     return path.join(getAppDataPath(), 'config.json');
 };
+
+// Certificates directory: ~/.mcpm/certs
+export const getCertsPath = () => {
+    return path.join(getAppDataPath(), 'certs');
+};

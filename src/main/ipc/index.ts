@@ -5,12 +5,14 @@ import { ConfigManager } from '../services/ConfigManager';
 import { LogManager } from '../services/LogManager';
 import { SystemUtils } from '../utils/SystemUtils';
 import { NgrokMultiTunnelManager } from '../services/NgrokMultiTunnelManager';
+import { HttpsProxyManager } from '../services/HttpsProxyManager';
 
 export function initializeIPC(
     processManager: ProcessManager,
     configManager: ConfigManager,
     logManager: LogManager,
-    ngrokManager?: NgrokMultiTunnelManager
+    ngrokManager?: NgrokMultiTunnelManager,
+    httpsProxyManager?: HttpsProxyManager
 ) {
     // Process Management
     ipcMain.handle(IPC_CHANNELS.PROCESS_LIST, async () => {
@@ -115,5 +117,51 @@ export function initializeIPC(
         } catch {
             // ignore
         }
+    });
+
+    // HTTPS Proxy
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_LIST, async () => {
+        return configManager.getHttpsProxies();
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_STATUS, async () => {
+        if (!httpsProxyManager) return [];
+        return httpsProxyManager.status();
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_CREATE, async (_e, hostname: string, cfg: any) => {
+        if (!httpsProxyManager) return false;
+        await httpsProxyManager.create(hostname, cfg);
+        return true;
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_UPDATE, async (_e, hostname: string, cfg: any) => {
+        if (!httpsProxyManager) return false;
+        await httpsProxyManager.update(hostname, cfg);
+        return true;
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_DELETE, async (_e, hostname: string) => {
+        if (!httpsProxyManager) return false;
+        await httpsProxyManager.delete(hostname);
+        return true;
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_START, async (_e, hostname: string) => {
+        if (!httpsProxyManager) return null;
+        return await httpsProxyManager.start(hostname);
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_STOP, async (_e, hostname: string) => {
+        if (!httpsProxyManager) return true;
+        return await httpsProxyManager.stop(hostname);
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_REGENERATE_CERT, async (_e, hostname: string) => {
+        if (!httpsProxyManager) return null;
+        return await httpsProxyManager.regenerateCertificate(hostname, 90);
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_LOG_READ, async (_e, hostname: string, lines?: number) => {
+        if (!httpsProxyManager) return [];
+        return await httpsProxyManager.readLogs(hostname, lines || 200);
+    });
+    ipcMain.handle(IPC_CHANNELS.HTTPS_PROXY_LOG_CLEAR, async (_e, hostname: string) => {
+        if (!httpsProxyManager) return;
+        try {
+            await httpsProxyManager.clearLogs(hostname);
+        } catch {}
     });
 }

@@ -6,6 +6,7 @@ import {
     Memory as ProcessIcon,
     Settings as SettingsIcon,
     Lan as NgrokIcon,
+    CompareArrows as ProxyIcon,
     Minimize as MinimizeIcon,
     CropSquare as MaximizeIcon,
     Close as CloseIcon,
@@ -82,6 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Box sx={{ WebkitAppRegion: 'no-drag', mr: 2, display: 'flex', gap: 1 }}>
                         {[
                             { path: '/processes', Icon: ProcessIcon, key: 'proc' },
+                            { path: '/https-proxy', Icon: ProxyIcon, key: 'https' },
                             { path: '/ngrok', Icon: NgrokIcon, key: 'ngrok' },
                             { path: '/settings', Icon: SettingsIcon, key: 'settings' },
                         ].map(({ path, Icon, key }) => {
@@ -138,6 +140,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                         <ProcessIcon fontSize='small' />
                                     </ListItemIcon>
                                     {t('process.title')}
+                                </MenuItem>
+                                <MenuItem
+                                    onClick={() => {
+                                        closeMenu();
+                                        navigate('/https-proxy');
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <ProxyIcon fontSize='small' />
+                                    </ListItemIcon>
+                                    HTTPS Proxy
                                 </MenuItem>
                                 <MenuItem
                                     onClick={() => {

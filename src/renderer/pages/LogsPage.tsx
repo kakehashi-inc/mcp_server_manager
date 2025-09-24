@@ -112,7 +112,7 @@ const LogsPage: React.FC = () => {
                 </ToggleButtonGroup>
 
                 <TextField
-                    label={t('logs.lines')}
+                    label={t('common.lines')}
                     type='number'
                     value={lineCount}
                     onChange={e => setLineCount(parseInt(e.target.value) || 100)}
@@ -126,12 +126,12 @@ const LogsPage: React.FC = () => {
                     onChange={() => setAutoRefresh(!autoRefresh)}
                     size='small'
                 >
-                    {t('logs.autoRefresh')}
+                    {t('common.autoRefresh')}
                 </ToggleButton>
 
                 <Box sx={{ flexGrow: 1 }} />
 
-                <IconButton onClick={loadLogs} title={t('logs.refresh')}>
+                <IconButton onClick={loadLogs} title={t('common.refresh')}>
                     <RefreshIcon />
                 </IconButton>
 
@@ -139,7 +139,7 @@ const LogsPage: React.FC = () => {
                     <CopyIcon />
                 </IconButton>
 
-                <IconButton onClick={handleClearLogs} title={t('logs.clear')} color='error'>
+                <IconButton onClick={handleClearLogs} title={t('common.clear')} color='error'>
                     <ClearIcon />
                 </IconButton>
             </Box>

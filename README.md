@@ -9,6 +9,7 @@ Electron-based GUI to start/stop, monitor, log, and expose (via ngrok) MCP serve
 - WSL support (Windows): run inside WSL with selectable distribution (`platform: "wsl"`)
 - Log management: per-process daily log files for `stdout`/`stderr`, auto-clean by retention days, hourly rotation
 - ngrok integration: open multiple ports at once, show/copy URLs, view/clear ngrok logs
+- HTTPS proxy management: terminate TLS locally and forward to local HTTP, per-day logs, cert auto-(re)generation
 - Auth Proxy (optional): wrap with `mcp-auth-proxy` to add OIDC authentication
 - i18n/theme: Japanese/English, light/dark modes
 
@@ -71,10 +72,10 @@ src/
 ├── main/                  # Electron main: IPC and managers
 │   ├── index.ts           # App boot / window / service init
 │   ├── ipc/               # IPC handlers
-│   ├── services/          # Process/Config/Log/ngrok managers
+│   ├── services/          # Process/Config/Log/ngrok/https-proxy managers
 │   └── utils/             # SystemUtils (WSL/exec helpers)
 ├── preload/               # Safe bridge APIs to renderer
-├── renderer/              # React + MUI UI (Processes/Logs/Settings/Ngrok)
+├── renderer/              # React + MUI UI (Processes/Logs/Settings/Ngrok/HTTPS Proxy)
 ├── shared/                # Types and constants (defaults/paths)
 └── public/                # Icons
 ```
@@ -105,15 +106,24 @@ All app data is stored under `~/.mcpm`.
 
 - Config: `~/.mcpm/config.json`
 - Logs: `~/.mcpm/logs/`
+  - Process logs: `{server_id}_YYYYMMDD_stdout.log`, `{server_id}_YYYYMMDD_stderr.log`
+  - Ngrok logs: `ngrok_YYYYMMDD.log`
+  - HTTPS proxy logs: `https_proxy_YYYYMMDD.log`
 
 Example:
 
 ```text
 ~/.mcpm/
 ├── config.json      # App settings and MCP server definitions
+├── certs/           # HTTPS proxy self-signed cert/key per hostname
+│   └── <hostname>/
+│       ├── cert.pem
+│       └── key.pem
 └── logs/
     ├── {server_id}_YYYYMMDD_stdout.log
-    └── {server_id}_YYYYMMDD_stderr.log
+    ├── {server_id}_YYYYMMDD_stderr.log
+    ├── ngrok_YYYYMMDD.log
+    └── https_proxy_YYYYMMDD.log
 ```
 
 ### config.json
@@ -156,6 +166,13 @@ The app loads/creates `~/.mcpm/config.json` based on `DEFAULT_CONFIG` in `shared
     "ngrokMetadataName": "MCP Server Manager",
     "ngrokPorts": "3000,4000",
     "ngrokAutoStart": false,
+    "httpsProxies": {
+      "example.local": {
+        "forwardPort": 8080,
+        "listenPort": 8443,
+        "autoStart": true
+      }
+    },
     "oidcProviderName": "Auth0",
     "oidcConfigurationUrl": "",
     "oidcClientId": "",

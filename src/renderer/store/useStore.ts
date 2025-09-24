@@ -1,5 +1,12 @@
 import { create } from 'zustand';
-import { MCPServerConfig, ProcessStatus, AppSettings, WSLDistribution, AppConfig } from '../../shared/types';
+import {
+    MCPServerConfig,
+    ProcessStatus,
+    AppSettings,
+    WSLDistribution,
+    AppConfig,
+    HttpsProxyStatus,
+} from '../../shared/types';
 
 interface MCPServerWithId {
     id: string;
@@ -24,6 +31,10 @@ interface AppState {
     error: string | null;
     snackbar: { open: boolean; message: string } | null;
 
+    // HTTPS Proxies
+    httpsProxies: Record<string, any>;
+    httpsProxyStatuses: HttpsProxyStatus[];
+
     // Actions
     setConfig: (config: AppConfig) => void;
     setServers: (servers: MCPServerWithId[]) => void;
@@ -46,6 +57,15 @@ interface AppState {
 
     // Initialize
     initialize: () => Promise<void>;
+
+    // HTTPS Proxies actions
+    loadHttpsProxies: () => Promise<void>;
+    createHttpsProxy: (hostname: string, cfg: any) => Promise<void>;
+    updateHttpsProxy: (hostname: string, cfg: any) => Promise<void>;
+    deleteHttpsProxy: (hostname: string) => Promise<void>;
+    startHttpsProxy: (hostname: string) => Promise<void>;
+    stopHttpsProxy: (hostname: string) => Promise<void>;
+    regenerateHttpsCert: (hostname: string) => Promise<void>;
 }
 
 const useStore = create<AppState>((set, get) => ({
@@ -59,6 +79,8 @@ const useStore = create<AppState>((set, get) => ({
     loading: false,
     error: null,
     snackbar: null,
+    httpsProxies: {},
+    httpsProxyStatuses: [],
 
     // Config actions
     setConfig: config => {
@@ -168,6 +190,9 @@ const useStore = create<AppState>((set, get) => ({
                 get().setProcessStatus(id, status);
             });
 
+            // Load https proxies
+            await get().loadHttpsProxies();
+
             set({ loading: false });
         } catch (error) {
             console.error('Failed to initialize:', error);
@@ -176,6 +201,38 @@ const useStore = create<AppState>((set, get) => ({
                 error: error instanceof Error ? error.message : 'Failed to initialize',
             });
         }
+    },
+
+    // HTTPS Proxies actions
+    loadHttpsProxies: async () => {
+        if (!window.electronAPI?.httpsProxyAPI) return;
+        const list = await window.electronAPI.httpsProxyAPI.list();
+        const statuses = await window.electronAPI.httpsProxyAPI.status();
+        set({ httpsProxies: list || {}, httpsProxyStatuses: statuses || [] });
+    },
+    createHttpsProxy: async (hostname, cfg) => {
+        await window.electronAPI.httpsProxyAPI.create(hostname, cfg);
+        await get().loadHttpsProxies();
+    },
+    updateHttpsProxy: async (hostname, cfg) => {
+        await window.electronAPI.httpsProxyAPI.update(hostname, cfg);
+        await get().loadHttpsProxies();
+    },
+    deleteHttpsProxy: async hostname => {
+        await window.electronAPI.httpsProxyAPI.remove(hostname);
+        await get().loadHttpsProxies();
+    },
+    startHttpsProxy: async hostname => {
+        await window.electronAPI.httpsProxyAPI.start(hostname);
+        await get().loadHttpsProxies();
+    },
+    stopHttpsProxy: async hostname => {
+        await window.electronAPI.httpsProxyAPI.stop(hostname);
+        await get().loadHttpsProxies();
+    },
+    regenerateHttpsCert: async hostname => {
+        await window.electronAPI.httpsProxyAPI.regenerateCert(hostname);
+        await get().loadHttpsProxies();
     },
 }));
 

@@ -168,10 +168,17 @@ export class LogManager {
 
         try {
             const files = await fs.readdir(logDir);
-
-            const pattern = new RegExp(`^(?:.*|log_.*)_\\d{8}(?:_\\d{2})?_(?:stdout|stderr)\\.log$`);
+            // Patterns:
+            // - Process logs: <id>_YYYYMMDD(_HH)?_<stdout|stderr>.log
+            // - Ngrok logs: ngrok_YYYYMMDD.log
+            // - HTTPS proxy logs: https_proxy_YYYYMMDD.log
+            const patterns: RegExp[] = [
+                new RegExp(`^(?:.*|log_.*)_\\d{8}(?:_\\d{2})?_(?:stdout|stderr)\\.log$`),
+                new RegExp(`^ngrok_\\d{8}\\.log$`),
+                new RegExp(`^https_proxy_\\d{8}\\.log$`),
+            ];
             for (const file of files) {
-                if (!pattern.test(file)) continue;
+                if (!patterns.some(p => p.test(file))) continue;
                 const filePath = path.join(logDir, file);
                 const stats = await fs.stat(filePath);
                 if (stats.mtime < cutoffDate) {

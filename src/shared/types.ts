@@ -64,6 +64,7 @@ export interface AppSettings {
 export interface AppConfig {
     mcpServers: MCPServers;
     settings: AppSettings;
+    httpsProxies?: HttpsProxies;
 }
 
 // Log Types
@@ -116,6 +117,18 @@ export const IPC_CHANNELS = {
     NGROK_STATUS: 'ngrok:status',
     NGROK_LOG_READ: 'ngrok:log:read',
     NGROK_LOG_CLEAR: 'ngrok:log:clear',
+
+    // HTTPS Proxy
+    HTTPS_PROXY_LIST: 'https-proxy:list',
+    HTTPS_PROXY_CREATE: 'https-proxy:create',
+    HTTPS_PROXY_UPDATE: 'https-proxy:update',
+    HTTPS_PROXY_DELETE: 'https-proxy:delete',
+    HTTPS_PROXY_START: 'https-proxy:start',
+    HTTPS_PROXY_STOP: 'https-proxy:stop',
+    HTTPS_PROXY_STATUS: 'https-proxy:status',
+    HTTPS_PROXY_REGENERATE_CERT: 'https-proxy:regenerate-cert',
+    HTTPS_PROXY_LOG_READ: 'https-proxy:log:read',
+    HTTPS_PROXY_LOG_CLEAR: 'https-proxy:log:clear',
 } as const;
 
 // System Info
@@ -125,4 +138,25 @@ export interface SystemInfo {
     version: string;
     wslAvailable: boolean;
     homeDirectory: string;
+}
+
+// HTTPS Proxy Types
+export interface HttpsProxyConfig {
+    forwardPort: number; // HTTP target port on localhost
+    listenPort: number; // HTTPS listen port
+    autoStart?: boolean;
+}
+
+export interface HttpsProxies {
+    [hostname: string]: HttpsProxyConfig;
+}
+
+export interface HttpsProxyStatus {
+    hostname: string;
+    forwardPort: number;
+    listenPort: number;
+    running: boolean;
+    certPath: string;
+    keyPath: string;
+    validTo?: string; // ISO string
 }

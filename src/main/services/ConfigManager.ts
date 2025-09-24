@@ -1,6 +1,13 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { AppConfig, AppSettings, MCPServerConfig, MCPServers } from '../../shared/types';
+import {
+    AppConfig,
+    AppSettings,
+    MCPServerConfig,
+    MCPServers,
+    HttpsProxies,
+    HttpsProxyConfig,
+} from '../../shared/types';
 import { DEFAULT_CONFIG, getConfigPath } from '../../shared/constants';
 
 export class ConfigManager {
@@ -9,6 +16,8 @@ export class ConfigManager {
 
     constructor() {
         this.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        // Ensure optional sections exist
+        (this.config as any).httpsProxies = (this.config as any).httpsProxies || {};
         this.configPath = getConfigPath();
     }
 
@@ -34,10 +43,12 @@ export class ConfigManager {
             this.config = {
                 mcpServers: loadedConfig.mcpServers || {},
                 settings: { ...DEFAULT_CONFIG.settings, ...(loadedConfig.settings || {}) },
-            };
+                httpsProxies: loadedConfig.httpsProxies || {},
+            } as AppConfig;
         } catch (error) {
             // If file doesn't exist or is invalid, use defaults
             this.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            (this.config as any).httpsProxies = (this.config as any).httpsProxies || {};
             await this.saveConfig();
         }
     }
@@ -120,5 +131,46 @@ export class ConfigManager {
     // Utility methods
     getLogDirectory(): string {
         return this.config.settings.logDirectory;
+    }
+
+    // HTTPS Proxy methods
+    getHttpsProxies(): HttpsProxies {
+        const proxies = (this.config as any).httpsProxies || {};
+        return { ...proxies };
+    }
+
+    getHttpsProxy(hostname: string): HttpsProxyConfig | null {
+        const proxies = (this.config as any).httpsProxies || {};
+        return proxies[hostname] || null;
+    }
+
+    async addHttpsProxy(hostname: string, proxy: HttpsProxyConfig): Promise<void> {
+        const proxies: HttpsProxies = (this.config as any).httpsProxies || {};
+        if (proxies[hostname]) {
+            throw new Error(`HTTPS proxy for hostname '${hostname}' already exists`);
+        }
+        (this.config as any).httpsProxies = { ...proxies, [hostname]: proxy };
+        await this.saveConfig();
+    }
+
+    async updateHttpsProxy(hostname: string, proxy: Partial<HttpsProxyConfig>): Promise<void> {
+        const proxies: HttpsProxies = (this.config as any).httpsProxies || {};
+        if (!proxies[hostname]) {
+            throw new Error(`HTTPS proxy for hostname '${hostname}' not found`);
+        }
+        (this.config as any).httpsProxies = {
+            ...proxies,
+            [hostname]: { ...proxies[hostname], ...proxy },
+        };
+        await this.saveConfig();
+    }
+
+    async deleteHttpsProxy(hostname: string): Promise<void> {
+        const proxies: HttpsProxies = (this.config as any).httpsProxies || {};
+        if (proxies[hostname]) {
+            const { [hostname]: _removed, ...rest } = proxies;
+            (this.config as any).httpsProxies = rest;
+            await this.saveConfig();
+        }
     }
 }

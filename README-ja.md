@@ -9,6 +9,7 @@ MCPサーバーの起動・停止・監視・ログ取得・公開(ngrok)を行�
 - **WSL対応 (Windows)**: `platform: "wsl"` 指定でWSL内実行、ディストリ選択に対応
 - **ログ管理**: プロセスごとに `stdout`/`stderr` を日別ファイルへ記録、保持日数で自動削除、定期ローテーション
 - **ngrok連携**: 複数ポートを同時にトンネリング、URL表示・コピー、ログ閲覧/クリア
+- **HTTPSプロキシ管理**: ローカルでTLS終端しローカルHTTPへ転送、日次ログ、自己署名証明書の自動(再)生成
 - **Auth Proxy連携 (任意)**: `mcp-auth-proxy` を中継としてOIDC認証を付与可能
 - **多言語対応/テーマ**: 日本語/英語、ライト/ダーク
 
@@ -71,10 +72,10 @@ src/
 ├── main/                  # Electron メイン: IPC/各種マネージャ
 │   ├── index.ts           # 起動・ウィンドウ生成・サービス初期化
 │   ├── ipc/               # IPCハンドラ
-│   ├── services/          # Process/Config/Log/ngrok 各マネージャ
+│   ├── services/          # Process/Config/Log/ngrok/https-proxy 各マネージャ
 │   └── utils/             # SystemUtils (WSL/実行ユーティリティ)
 ├── preload/               # renderer へ安全にAPIをブリッジ
-├── renderer/              # React + MUI UI (Processes/Logs/Settings/Ngrok)
+├── renderer/              # React + MUI UI (Processes/Logs/Settings/Ngrok/HTTPS Proxy)
 ├── shared/                # 型定義・定数(Default設定/保存パス)
 └── public/                # アイコン等
 ```
@@ -105,15 +106,24 @@ MIT
 
 - **設定ファイル**: `~/.mcpm/config.json`
 - **ログファイル**: `~/.mcpm/logs/`
+  - プロセスログ: `{server_id}_YYYYMMDD_stdout.log`, `{server_id}_YYYYMMDD_stderr.log`
+  - ngrokログ: `ngrok_YYYYMMDD.log`
+  - HTTPSプロキシログ: `https_proxy_YYYYMMDD.log`
 
 #### ファイル構造
 
 ```text
 ~/.mcpm/
 ├── config.json      # 設定とMCPサーバー定義
+├── certs/           # HTTPSプロキシ用のホスト名ごとの自己署名証明書
+│   └── <hostname>/
+│       ├── cert.pem
+│       └── key.pem
 └── logs/            # ログファイル
     ├── {server_id}_YYYYMMDD_stdout.log
-    └── {server_id}_YYYYMMDD_stderr.log
+    ├── {server_id}_YYYYMMDD_stderr.log
+    ├── ngrok_YYYYMMDD.log
+    └── https_proxy_YYYYMMDD.log
 ```
 
 #### config.json の形式
@@ -156,6 +166,13 @@ MIT
     "ngrokMetadataName": "MCP Server Manager",
     "ngrokPorts": "3000,4000",
     "ngrokAutoStart": false,
+    "httpsProxies": {
+      "example.local": {
+        "forwardPort": 8080,
+        "listenPort": 8443,
+        "autoStart": true
+      }
+    },
     "oidcProviderName": "Auth0",
     "oidcConfigurationUrl": "",
     "oidcClientId": "",

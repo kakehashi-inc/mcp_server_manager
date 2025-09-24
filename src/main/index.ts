@@ -6,6 +6,7 @@ import { ProcessManager } from './services/ProcessManager';
 import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
 import { NgrokMultiTunnelManager } from './services/NgrokMultiTunnelManager';
+import { HttpsProxyManager } from './services/HttpsProxyManager';
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -13,6 +14,7 @@ let processManager: ProcessManager;
 let configManager: ConfigManager;
 let logManager: LogManager;
 let ngrokManager: NgrokMultiTunnelManager;
+let httpsProxyManager: HttpsProxyManager;
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
@@ -188,9 +190,12 @@ async function initializeServices() {
 
     // Ngrok manager (independent from process manager)
     ngrokManager = new NgrokMultiTunnelManager(configManager);
+    // HTTPS proxy manager
+    httpsProxyManager = new HttpsProxyManager(configManager);
+    await httpsProxyManager.initialize();
 
     // Initialize IPC handlers
-    initializeIPC(processManager, configManager, logManager, ngrokManager);
+    initializeIPC(processManager, configManager, logManager, ngrokManager, httpsProxyManager);
 
     // Optional auto-start ngrok based on settings
     try {
@@ -207,6 +212,22 @@ async function initializeServices() {
 
     // Start log rotation
     logManager.startRotation();
+
+    // Auto-start HTTPS proxies with autoStart=true
+    try {
+        const proxies = configManager.getHttpsProxies();
+        for (const [hostname, cfg] of Object.entries(proxies)) {
+            if (cfg?.autoStart) {
+                try {
+                    await httpsProxyManager.start(hostname);
+                } catch (e) {
+                    // ignore startup failures; user can manage from UI
+                }
+            }
+        }
+    } catch {
+        // ignore
+    }
 }
 
 app.whenReady().then(async () => {

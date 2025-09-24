@@ -116,10 +116,10 @@ const NgrokPage: React.FC = () => {
                 <Typography variant='h4'>{t('ngrok.title')}</Typography>
                 <Stack direction='row' spacing={1}>
                     <Button variant='contained' onClick={handleStart} disabled={busy || tunnels.length > 0}>
-                        {t('ngrok.start')}
+                        {t('common.start')}
                     </Button>
                     <Button variant='outlined' onClick={handleStop} disabled={busy || tunnels.length === 0}>
-                        {t('ngrok.stop')}
+                        {t('common.stop')}
                     </Button>
                 </Stack>
             </Stack>
@@ -132,9 +132,9 @@ const NgrokPage: React.FC = () => {
 
             <Paper sx={{ p: 2, mb: 3, flexShrink: 0 }}>
                 <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
-                    <Typography variant='h6'>{t('ngrok.status')}</Typography>
+                    <Typography variant='h6'>{t('common.status')}</Typography>
                     <Typography variant='body2' color='text.secondary'>
-                        {tunnels.length > 0 ? 'Running' : 'Stopped'}
+                        {tunnels.length > 0 ? t('common.running') : t('common.stopped')}
                     </Typography>
                 </Stack>
                 <TableContainer>
@@ -185,12 +185,12 @@ const NgrokPage: React.FC = () => {
             <Paper sx={{ p: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                 <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
                     <Typography variant='h6' sx={{ mr: 1 }}>
-                        {t('ngrok.logs')}
+                        {t('common.logs')}
                     </Typography>
                     <TextField
                         size='small'
                         type='number'
-                        label={t('logs.lines')}
+                        label={t('common.lines')}
                         value={lines}
                         onChange={e => setLines(Math.max(10, parseInt(e.target.value) || 100))}
                         sx={{ width: 140 }}
@@ -201,10 +201,10 @@ const NgrokPage: React.FC = () => {
                         onChange={() => setAutoRefresh(v => !v)}
                         size='small'
                     >
-                        {t('logs.autoRefresh')}
+                        {t('common.autoRefresh')}
                     </ToggleButton>
                     <Box sx={{ flexGrow: 1 }} />
-                    <IconButton onClick={refresh} title={t('logs.refresh')} disabled={busy}>
+                    <IconButton onClick={refresh} title={t('common.refresh')} disabled={busy}>
                         <RefreshIcon />
                     </IconButton>
                     <IconButton
@@ -224,7 +224,7 @@ const NgrokPage: React.FC = () => {
                             await window.electronAPI.ngrokAPI.clearLogs();
                             await refresh();
                         }}
-                        title={t('logs.clear')}
+                        title={t('common.clear')}
                     >
                         <ClearIcon />
                     </IconButton>
