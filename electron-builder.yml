@@ -48,6 +48,7 @@ win:
 
 nsis:
   shortcutName: MCP Server Manager
+  buildUniversalInstaller: false
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
@@ -87,5 +88,5 @@ linux:
   desktop:
     entry:
       Name: MCP Server Manager
-      Comment: Manage MCP server processes
+      Comment: "GUI to manage MCP servers: process control, ngrok tunnels, HTTPS proxy, WSL support, optional OIDC auth."
       Categories: Development;
