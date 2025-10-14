@@ -6,6 +6,7 @@ directories:
 artifactName: "mcpm-${version}-${os}-${arch}.${ext}"
 portable:
   artifactName: "mcpm-${version}-${os}-${arch}-portable.${ext}"
+  buildUniversalInstaller: false
 publish:
   provider: github
   owner: kakehashi-inc
