@@ -17,7 +17,7 @@ Electron-based GUI to start/stop, monitor, log, and expose (via ngrok) MCP serve
 
 - Windows 10/11 (with WSL detection/list)
 - macOS 10.15+
-- Linux (Ubuntu/Debian, RHEL/CentOS/Fedora)
+- Linux (planned)
 
 ## Setup
 

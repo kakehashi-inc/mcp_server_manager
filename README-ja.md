@@ -17,7 +17,7 @@ MCPサーバーの起動・停止・監視・ログ取得・公開(ngrok)を行�
 
 - Windows 10/11 (WSL対応)
 - macOS 10.15+
-- Linux (Ubuntu/Debian, RHEL/CentOS/Fedora)
+- Linux (予定)
 
 ## 開発環境のセットアップ
 
