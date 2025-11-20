@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { initializeIPC } from './ipc';
@@ -17,6 +17,7 @@ let ngrokManager: NgrokMultiTunnelManager;
 let httpsProxyManager: HttpsProxyManager;
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
+const isMac = process.platform === 'darwin';
 
 // Enforce single instance
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
@@ -47,6 +48,12 @@ function resolveIconPath(): string | undefined {
     return undefined;
 }
 
+function resolveTrayIconPath(): string | undefined {
+    const trayPath = path.join(__dirname, '../../public/tray-icon.png');
+    if (fs.existsSync(trayPath)) return trayPath;
+    return resolveIconPath();
+}
+
 function showMainWindow() {
     if (!mainWindow) {
         createWindow();
@@ -62,12 +69,28 @@ function showMainWindow() {
 }
 
 function createTray() {
-    const iconPath = resolveIconPath();
+    const iconPath = isMac ? resolveTrayIconPath() : resolveIconPath();
     if (!iconPath) {
         tray = null;
         return;
     }
-    tray = new Tray(iconPath);
+
+    if (isMac) {
+        let trayImage = nativeImage.createFromPath(iconPath);
+        if (trayImage.isEmpty()) {
+            trayImage = nativeImage.createFromPath(resolveIconPath() ?? '');
+        }
+        if (trayImage.isEmpty()) {
+            tray = null;
+            return;
+        }
+        trayImage = trayImage.resize({ width: 18, height: 18 });
+        trayImage.setTemplateImage(true);
+        tray = new Tray(trayImage);
+    } else {
+        tray = new Tray(iconPath);
+    }
+
     const language = configManager?.getSettings().language || 'ja';
     const labels = language === 'ja' ? { open: '開く', quit: '終了' } : { open: 'Open', quit: 'Quit' };
     const menu = Menu.buildFromTemplate([
@@ -106,7 +129,15 @@ function createWindow() {
             preload: path.join(__dirname, '../preload/index.js'),
         },
         frame: false,
-        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+        titleBarStyle: isMac ? 'hiddenInset' : 'default',
+        trafficLightPosition: isMac ? { x: 18, y: 18 } : undefined,
+        titleBarOverlay: isMac
+            ? {
+                  color: '#00000000',
+                  symbolColor: '#ffffff',
+                  height: 64,
+              }
+            : undefined,
         icon: resolveIconPath(),
     });
 
@@ -236,9 +267,7 @@ app.whenReady().then(async () => {
     createWindow();
 
     app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
+        showMainWindow();
     });
 });
 

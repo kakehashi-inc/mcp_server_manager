@@ -37,8 +37,7 @@ const SettingsPage: React.FC = () => {
 
         const updatedSettings = { ...localSettings };
 
-        await window.electronAPI.settingsAPI.update(updatedSettings);
-        updateSettings(updatedSettings);
+        await updateSettings(updatedSettings);
 
         // Apply language change immediately
         if (updatedSettings.language !== i18n.language) {
@@ -101,7 +100,11 @@ const SettingsPage: React.FC = () => {
                         control={
                             <Switch
                                 checked={localSettings.darkMode}
-                                onChange={e => setLocalSettings({ ...localSettings, darkMode: e.target.checked })}
+                                onChange={async e => {
+                                    const checked = e.target.checked;
+                                    setLocalSettings({ ...localSettings, darkMode: checked });
+                                    await updateSettings({ darkMode: checked });
+                                }}
                             />
                         }
                         label={t('settings.darkMode')}

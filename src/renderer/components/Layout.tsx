@@ -24,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
+    const [isMac, setIsMac] = useState(false);
 
     const handleMinimize = () => {
         window.electronAPI.windowAPI.minimize();
@@ -56,6 +57,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         };
     }, []);
 
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const info = await window.electronAPI.systemAPI.getInfo();
+                if (mounted) {
+                    setIsMac(info?.platform === 'darwin');
+                }
+            } catch {
+                if (mounted) {
+                    setIsMac(false);
+                }
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
     return (
         <Box sx={{ display: 'flex', height: '100vh' }}>
             <AppBar
@@ -64,9 +84,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     width: '100%',
                     ml: 0,
                     WebkitAppRegion: 'drag',
+                    pl: isMac ? '72px' : 0,
+                    pt: isMac ? 0.5 : 0,
                 }}
             >
-                <Toolbar>
+                <Toolbar
+                    sx={{
+                        minHeight: appBarHeight,
+                        pl: isMac ? 0 : 0,
+                    }}
+                >
                     <Typography
                         variant='h6'
                         noWrap
@@ -118,87 +145,95 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             );
                         })}
                     </Box>
-                    {
-                        <Box sx={{ WebkitAppRegion: 'no-drag' }}>
-                            <IconButton size='small' edge='end' color='inherit' onClick={openMenu} sx={{ mr: 1 }}>
-                                <MenuIcon />
-                            </IconButton>
-                            <Menu
-                                anchorEl={menuAnchorEl}
-                                open={Boolean(menuAnchorEl)}
-                                onClose={closeMenu}
-                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    <Box sx={{ WebkitAppRegion: 'no-drag', display: 'flex', alignItems: 'center' }}>
+                        <IconButton size='small' edge='end' color='inherit' onClick={openMenu} sx={{ mr: 1 }}>
+                            <MenuIcon />
+                        </IconButton>
+                        <Menu
+                            anchorEl={menuAnchorEl}
+                            open={Boolean(menuAnchorEl)}
+                            onClose={closeMenu}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    closeMenu();
+                                    navigate('/processes');
+                                }}
                             >
-                                <MenuItem
-                                    onClick={() => {
-                                        closeMenu();
-                                        navigate('/processes');
-                                    }}
+                                <ListItemIcon>
+                                    <ProcessIcon fontSize='small' />
+                                </ListItemIcon>
+                                {t('process.title')}
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    closeMenu();
+                                    navigate('/https-proxy');
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <ProxyIcon fontSize='small' />
+                                </ListItemIcon>
+                                HTTPS Proxy
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    closeMenu();
+                                    navigate('/ngrok');
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <NgrokIcon fontSize='small' />
+                                </ListItemIcon>
+                                {t('ngrok.title')}
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    closeMenu();
+                                    navigate('/settings');
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <SettingsIcon fontSize='small' />
+                                </ListItemIcon>
+                                {t('settings.title')}
+                            </MenuItem>
+                            <Divider />
+                            <MenuItem
+                                onClick={() => {
+                                    closeMenu();
+                                    // Quit app (same behavior as tray Quit)
+                                    window.electronAPI.windowAPI.close(true);
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <PowerIcon fontSize='small' />
+                                </ListItemIcon>
+                                {t('tray.quit')}
+                            </MenuItem>
+                        </Menu>
+                        {!isMac && (
+                            <>
+                                <IconButton size='small' edge='end' color='inherit' onClick={handleMinimize}>
+                                    <MinimizeIcon />
+                                </IconButton>
+                                <IconButton
+                                    size='small'
+                                    edge='end'
+                                    color='inherit'
+                                    onClick={handleMaximize}
+                                    sx={{ mx: 1 }}
                                 >
-                                    <ListItemIcon>
-                                        <ProcessIcon fontSize='small' />
-                                    </ListItemIcon>
-                                    {t('process.title')}
-                                </MenuItem>
-                                <MenuItem
-                                    onClick={() => {
-                                        closeMenu();
-                                        navigate('/https-proxy');
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <ProxyIcon fontSize='small' />
-                                    </ListItemIcon>
-                                    HTTPS Proxy
-                                </MenuItem>
-                                <MenuItem
-                                    onClick={() => {
-                                        closeMenu();
-                                        navigate('/ngrok');
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <NgrokIcon fontSize='small' />
-                                    </ListItemIcon>
-                                    {t('ngrok.title')}
-                                </MenuItem>
-                                <MenuItem
-                                    onClick={() => {
-                                        closeMenu();
-                                        navigate('/settings');
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <SettingsIcon fontSize='small' />
-                                    </ListItemIcon>
-                                    {t('settings.title')}
-                                </MenuItem>
-                                <Divider />
-                                <MenuItem
-                                    onClick={() => {
-                                        closeMenu();
-                                        // Quit app (same behavior as tray Quit)
-                                        window.electronAPI.windowAPI.close(true);
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <PowerIcon fontSize='small' />
-                                    </ListItemIcon>
-                                    {t('tray.quit')}
-                                </MenuItem>
-                            </Menu>
-                            <IconButton size='small' edge='end' color='inherit' onClick={handleMinimize}>
-                                <MinimizeIcon />
-                            </IconButton>
-                            <IconButton size='small' edge='end' color='inherit' onClick={handleMaximize} sx={{ mx: 1 }}>
-                                <MaximizeIcon />
-                            </IconButton>
-                            <IconButton size='small' edge='end' color='inherit' onClick={handleClose}>
-                                <CloseIcon />
-                            </IconButton>
-                        </Box>
-                    }
+                                    <MaximizeIcon />
+                                </IconButton>
+                                <IconButton size='small' edge='end' color='inherit' onClick={handleClose}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </>
+                        )}
+                    </Box>
                 </Toolbar>
             </AppBar>
             <Box

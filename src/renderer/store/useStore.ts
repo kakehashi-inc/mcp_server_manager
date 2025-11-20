@@ -45,7 +45,7 @@ interface AppState {
     setSelectedServerId: (id: string | null) => void;
 
     setSettings: (settings: AppSettings) => void;
-    updateSettings: (settings: Partial<AppSettings>) => void;
+    updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
 
     setWSLAvailable: (available: boolean) => void;
     setWSLDistributions: (distributions: WSLDistribution[]) => void;
