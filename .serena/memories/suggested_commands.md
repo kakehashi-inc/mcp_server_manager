@@ -1,0 +1,1 @@
+Setup: `yarn install`. Development: `yarn dev` (runs main tsc -w, renderer Vite at :3001, and Electron). Production preview: `yarn build && yarn start`. Packaging: `yarn dist:mac`, `yarn dist:win`, `yarn dist:linux` (or `yarn dist`). Distribution releases: `yarn release:<platform>`. Clean artifacts: `yarn clean`. Electron entry point: `yarn start` after build.

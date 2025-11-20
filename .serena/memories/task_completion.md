@@ -1,0 +1,1 @@
+After changes, run relevant scripts: `yarn build` (compiles main TS + Vite bundle) and, if UX-related, launch `yarn dev` or `yarn start` to verify Electron UI. Use ESLint/Prettier defaults (configured via `eslint`/`prettier` configs) before delivering. Ensure ~/.mcpm config/log paths are respected when touching ConfigManager or services.
