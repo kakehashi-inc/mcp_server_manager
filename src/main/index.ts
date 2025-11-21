@@ -7,6 +7,7 @@ import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
 import { NgrokMultiTunnelManager } from './services/NgrokMultiTunnelManager';
 import { HttpsProxyManager } from './services/HttpsProxyManager';
+import { SystemUtils } from './utils/SystemUtils';
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -18,6 +19,11 @@ let httpsProxyManager: HttpsProxyManager;
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 const isMac = process.platform === 'darwin';
+
+// Fix PATH on macOS for GUI apps
+if (isMac) {
+    SystemUtils.fixPath();
+}
 
 // Enforce single instance
 const gotSingleInstanceLock = app.requestSingleInstanceLock();

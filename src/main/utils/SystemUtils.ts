@@ -271,4 +271,38 @@ export class SystemUtils {
             });
         });
     }
+
+    /**
+     * macOS only: Fixes the process.env.PATH by loading the user's shell environment.
+     * This is necessary for GUI apps launched from Finder/Dock which don't inherit the shell environment.
+     */
+    static async fixPath(): Promise<void> {
+        try {
+            // Use a marker to reliably extract the PATH even if the shell profile outputs other text
+            // We run an interactive login shell to ensure .zprofile and .zshrc are loaded
+            const marker = '___MCP_SERVER_MANAGER_PATH___';
+            const command = `/bin/zsh -l -i -c 'echo "${marker}$PATH"'`;
+
+            // We use exec directly to avoid our own spawnCommand wrapper which might interfere
+            const { stdout } = await promisify(exec)(command, {
+                encoding: 'utf8',
+                timeout: 3000, // Fail fast if shell hangs
+            });
+
+            const markerIndex = stdout.indexOf(marker);
+            if (markerIndex !== -1) {
+                const pathLine = stdout.substring(markerIndex + marker.length);
+                // Take the first line after the marker (in case of trailing newlines or other output)
+                const newPath = pathLine.split('\n')[0].trim();
+
+                if (newPath && newPath.length > 0) {
+                    process.env.PATH = newPath;
+                    console.log('Successfully fixed PATH from user shell');
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to fix PATH from user shell:', error);
+            // Non-fatal, continue with default PATH
+        }
+    }
 }
