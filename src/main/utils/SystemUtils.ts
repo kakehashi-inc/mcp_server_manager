@@ -194,13 +194,44 @@ export class SystemUtils {
             });
         }
 
-        // host
-        return spawn(command, args, {
-            cwd: options.cwd,
-            windowsHide,
-            shell: false,
-            env: { ...process.env, ...(options.env || {}) },
-        });
+        const isWin = os.platform() === 'win32';
+        const isMac = os.platform() === 'darwin';
+        let child: ChildProcess;
+        if (isWin) {
+            // On Windows, always use PowerShell for consistent execution
+            const psCommand = `& '${command}' ${args.map(arg => `'${arg}'`).join(' ')}`;
+            child = spawn('powershell', ['-Command', psCommand], {
+                cwd: options.cwd,
+                env: { ...process.env, ...(options.env || {}) },
+                shell: false,
+                windowsHide,
+            });
+        } else if (isMac) {
+            // On macOS, use zsh to execute commands
+            // This ensures shell environment variables (PATH from .zshrc, etc.) are maintained
+            // Escape arguments properly for shell execution
+            const escapedArgs = args.map(arg => {
+                // Escape single quotes by replacing ' with '\''
+                const escaped = arg.replace(/'/g, "'\\''");
+                return `'${escaped}'`;
+            });
+            child = spawn('/bin/zsh', ['-c', `'${command}' ${escapedArgs.join(' ')}`.trim()], {
+                cwd: options.cwd,
+                env: { ...process.env, ...(options.env || {}) },
+                shell: false,
+                windowsHide,
+            });
+        } else {
+            // On Unix-like systems, use direct execution
+            child = spawn(command, args, {
+                cwd: options.cwd,
+                env: { ...process.env, ...(options.env || {}) },
+                shell: false,
+                windowsHide,
+            });
+        }
+
+        return child;
     }
 
     // ---------- Quoting helpers ----------
