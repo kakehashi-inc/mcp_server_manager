@@ -1,5 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.IPC_CHANNELS = void 0;
 // IPC Channel Names
 exports.IPC_CHANNELS = {
@@ -28,5 +28,5 @@ exports.IPC_CHANNELS = {
     SYSTEM_INFO: 'system:info',
     APP_QUIT: 'app:quit',
     APP_MINIMIZE: 'app:minimize',
-    APP_MAXIMIZE: 'app:maximize'
+    APP_MAXIMIZE: 'app:maximize',
 };
