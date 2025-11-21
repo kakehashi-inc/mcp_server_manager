@@ -1,7 +1,6 @@
 import { exec, spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
 import * as os from 'os';
-import * as fs from 'fs';
 import { SystemInfo, WSLDistribution } from '../../shared/types';
 
 const execAsync = promisify(exec);
@@ -103,59 +102,6 @@ export class SystemUtils {
             console.error('Failed to get WSL distributions:', error);
             return [];
         }
-    }
-
-    static async executeInWSL(
-        distribution: string,
-        command: string,
-        args: string[] = [],
-        env: Record<string, string> = {}
-    ): Promise<{ stdout: string; stderr: string }> {
-        const result = await SystemUtils.execCommand(command, args, {
-            platform: 'wsl',
-            wslDistribution: distribution,
-            env,
-        });
-        return { stdout: result.stdout, stderr: result.stderr };
-    }
-
-    static getPlatformName(): string {
-        switch (process.platform) {
-            case 'win32':
-                return 'Windows';
-            case 'darwin':
-                return 'macOS';
-            case 'linux':
-                return 'Linux';
-            default:
-                return process.platform;
-        }
-    }
-
-    static isLinuxDistro(type: 'ubuntu' | 'rhel'): boolean {
-        if (process.platform !== 'linux') {
-            return false;
-        }
-
-        try {
-            const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
-
-            if (type === 'ubuntu') {
-                return osRelease.includes('Ubuntu') || osRelease.includes('Debian');
-            } else if (type === 'rhel') {
-                return (
-                    osRelease.includes('Red Hat') ||
-                    osRelease.includes('CentOS') ||
-                    osRelease.includes('Fedora') ||
-                    osRelease.includes('Rocky') ||
-                    osRelease.includes('AlmaLinux')
-                );
-            }
-        } catch {
-            return false;
-        }
-
-        return false;
     }
 
     // Unified command execution utilities

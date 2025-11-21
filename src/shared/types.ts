@@ -28,8 +28,6 @@ export interface ProcessStatus {
     lastChecked: string;
 }
 
-export type PlatformType = 'host' | 'wsl';
-
 export interface WSLDistribution {
     name: string;
     version: number;
@@ -65,15 +63,6 @@ export interface AppConfig {
     mcpServers: MCPServers;
     settings: AppSettings;
     httpsProxies?: HttpsProxies;
-}
-
-// Log Types
-export interface LogEntry {
-    timestamp: string;
-    level: 'info' | 'warn' | 'error';
-    message: string;
-    processId: string;
-    type: 'stdout' | 'stderr';
 }
 
 // IPC Channel Names

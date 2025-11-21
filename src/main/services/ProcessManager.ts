@@ -87,29 +87,6 @@ export class ProcessManager {
         return true;
     }
 
-    async renameProcess(oldId: string, newId: string): Promise<void> {
-        // Stop the process if running
-        const wasRunning = this.runningProcesses.has(oldId);
-        if (wasRunning) {
-            await this.stopProcess(oldId);
-        }
-
-        // Rename in config
-        await this.configManager.renameMCPServer(oldId, newId);
-
-        // Update status
-        const oldStatus = this.processStatuses.get(oldId);
-        if (oldStatus) {
-            this.processStatuses.delete(oldId);
-            this.processStatuses.set(newId, { ...oldStatus, id: newId });
-        }
-
-        // Restart if it was running
-        if (wasRunning) {
-            await this.startProcess(newId);
-        }
-    }
-
     async startProcess(id: string): Promise<boolean> {
         const config = this.configManager.getMCPServer(id);
         if (!config) {
@@ -495,10 +472,6 @@ export class ProcessManager {
 
     async getProcessStatus(id: string): Promise<ProcessStatus | null> {
         return this.processStatuses.get(id) || null;
-    }
-
-    async getAllStatuses(): Promise<ProcessStatus[]> {
-        return Array.from(this.processStatuses.values());
     }
 
     private async handleProcessTermination(

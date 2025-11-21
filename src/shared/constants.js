@@ -54,7 +54,6 @@ var __importStar =
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.getConfigPath =
     exports.getAppDataPath =
-    exports.SUPPORTED_LANGUAGES =
     exports.LOG_ROTATION_INTERVAL =
     exports.PROCESS_CHECK_INTERVAL =
     exports.APP_VERSION =
@@ -81,11 +80,6 @@ exports.APP_VERSION = '1.0.0';
 exports.PROCESS_CHECK_INTERVAL = 5000;
 // Log Rotation Interval (ms)
 exports.LOG_ROTATION_INTERVAL = 3600000; // 1 hour
-// Supported Languages
-exports.SUPPORTED_LANGUAGES = [
-    { code: 'ja', name: '日本語' },
-    { code: 'en', name: 'English' },
-];
 // File Paths
 const getAppDataPath = () => {
     // All settings are stored in ~/.mcpm directory

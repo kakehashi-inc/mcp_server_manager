@@ -37,12 +37,6 @@ export const PROCESS_CHECK_INTERVAL = 5000;
 // Log Rotation Interval (ms)
 export const LOG_ROTATION_INTERVAL = 3600000; // 1 hour
 
-// Supported Languages
-export const SUPPORTED_LANGUAGES = [
-    { code: 'ja', name: '日本語' },
-    { code: 'en', name: 'English' },
-] as const;
-
 // File Paths
 export const getAppDataPath = () => {
     // All settings are stored in ~/.mcpm directory
