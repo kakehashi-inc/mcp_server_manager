@@ -199,7 +199,7 @@ export class SystemUtils {
         let child: ChildProcess;
         if (isWin) {
             // On Windows, always use PowerShell for consistent execution
-            const psCommand = `& '${command}' ${args.map(arg => `'${arg}'`).join(' ')}`;
+            const psCommand = `& '${command}' ${args.map(arg => `'${arg}'`).join(' ')}`.trim();
             child = spawn('powershell', ['-Command', psCommand], {
                 cwd: options.cwd,
                 env: { ...process.env, ...(options.env || {}) },
@@ -215,7 +215,8 @@ export class SystemUtils {
                 const escaped = arg.replace(/'/g, "'\\''");
                 return `'${escaped}'`;
             });
-            child = spawn('/bin/zsh', ['-c', `'${command}' ${escapedArgs.join(' ')}`.trim()], {
+            const zshCommand = `'${command}' ${escapedArgs.join(' ')}`.trim();
+            child = spawn('/bin/zsh', ['-c', zshCommand], {
                 cwd: options.cwd,
                 env: { ...process.env, ...(options.env || {}) },
                 shell: false,
