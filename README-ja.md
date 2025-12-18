@@ -13,6 +13,14 @@ MCPサーバーの起動・停止・監視・ログ取得・公開(ngrok)を行�
 - **Auth Proxy連携 (任意)**: `mcp-auth-proxy` を中継としてOIDC認証を付与可能
 - **多言語対応/テーマ**: 日本語/英語、ライト/ダーク
 
+## 対応OS
+
+- Windows 10/11
+- macOS 10.15+
+- Linux (Debian系/RHEL系)
+
+注記: 本プロジェクトは Windows ではコード署名を行っていません。SmartScreen が警告を表示する場合は「詳細情報」→「実行」を選択してください。
+
 ## データファイルの保存場所
 
 すべてのデータは `~/.mcpm` ディレクトリに保存されます：
@@ -109,7 +117,7 @@ MCPサーバーの起動・停止・監視・ログ取得・公開(ngrok)を行�
 - **useAuthProxy**: mcp-auth-proxyでラップ実行
 - **authProxyListenPort** / **authProxyExternalUrl**: Auth Proxy利用時の必須項目
 
-## 3. 開発者向けリファレンス
+## 開発者向けリファレンス
 
 ### 開発ルール
 

@@ -13,6 +13,14 @@ Electron-based GUI application to start/stop, monitor, log, and expose (via ngro
 - **Auth Proxy (Optional)**: Wrap with `mcp-auth-proxy` to add OIDC authentication
 - **i18n/Theme**: Japanese/English, light/dark modes
 
+## Supported OS
+
+- Windows 10/11
+- macOS 10.15+
+- Linux (Debian-based/RHEL-based)
+
+Note: This project is not code-signed on Windows. If SmartScreen displays a warning, select "More info" → "Run anyway".
+
 ## Data Files Location
 
 All data is stored under the `~/.mcpm` directory:
@@ -109,7 +117,7 @@ Configuration file generated based on the app's default `DEFAULT_CONFIG`:
 - **useAuthProxy**: Wrap execution with mcp-auth-proxy
 - **authProxyListenPort** / **authProxyExternalUrl**: Required fields when using Auth Proxy
 
-## 3. Developer Reference
+## Developer Reference
 
 ### Development Rules
 
