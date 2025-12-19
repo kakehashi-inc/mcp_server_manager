@@ -121,7 +121,7 @@ Configuration file generated based on the app's default `DEFAULT_CONFIG`:
 
 ### Development Rules
 
-- Developer documentation (except `README.md`) should be placed in the `Documents` directory.
+- Developer documentation (except `README.md`, `README-ja.md`) should be placed in the `Documents` directory.
 - Always run the linter after making changes and apply appropriate fixes. If intentionally allowing linter errors, document this in a comment. **Build is only for release; linter check is sufficient for debugging.**
 - When implementing models, place files per table.
 - Reusable components should be implemented in files within the `modules` directory.
