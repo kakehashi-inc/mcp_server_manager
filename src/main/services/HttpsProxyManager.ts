@@ -139,7 +139,7 @@ export class HttpsProxyManager {
         const selfsigned: any = (mod as any).default ?? mod;
 
         const attrs = [{ name: 'commonName', value: hostname }];
-        const pems = selfsigned.generate(attrs, {
+        const pems = await selfsigned.generate(attrs, {
             days,
             keySize: 2048,
             algorithm: 'sha256',

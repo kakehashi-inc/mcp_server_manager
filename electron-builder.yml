@@ -21,7 +21,7 @@ releaseInfo:
 
     ## Bug Fixes
 
-    -
+    - Fix HTTPS proxy start and certificate regeneration errors after selfsigned v5 upgrade (async API)
 
 files:
   - dist/**/*
