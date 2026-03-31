@@ -119,16 +119,6 @@ Configuration file generated based on the app's default `DEFAULT_CONFIG`:
 
 ## Developer Reference
 
-### Development Rules
-
-- Developer documentation (except `README.md`, `README-ja.md`) should be placed in the `Documents` directory.
-- Always run the linter after making changes and apply appropriate fixes. If intentionally allowing linter errors, document this in a comment. **Build is only for release; linter check is sufficient for debugging.**
-- When implementing models, place files per table.
-- Reusable components should be implemented in files within the `modules` directory.
-- Temporary scripts (e.g., investigation scripts) should be placed in the `scripts` directory.
-- When creating or modifying models, update `Documents/Table Definitions.md`. Table definitions should be represented as tables, showing column names, types, and relations.
-- When system behavior changes, update `Documents/System Specifications.md`.
-
 ### Requirements
 
 - Node.js 22.x or higher
