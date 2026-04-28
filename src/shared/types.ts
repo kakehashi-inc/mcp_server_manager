@@ -118,7 +118,24 @@ export const IPC_CHANNELS = {
     HTTPS_PROXY_REGENERATE_CERT: 'https-proxy:regenerate-cert',
     HTTPS_PROXY_LOG_READ: 'https-proxy:log:read',
     HTTPS_PROXY_LOG_CLEAR: 'https-proxy:log:clear',
+
+    // Updater
+    UPDATER_CHECK: 'updater:check',
+    UPDATER_DOWNLOAD: 'updater:download',
+    UPDATER_QUIT_AND_INSTALL: 'updater:quit-and-install',
+    UPDATER_GET_STATE: 'updater:get-state',
+    UPDATER_STATE_CHANGED: 'updater:state-changed',
 } as const;
+
+// Updater Types
+export type UpdateStatus = 'idle' | 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
+
+export interface UpdateState {
+    status: UpdateStatus;
+    version?: string;
+    progress?: number;
+    error?: string;
+}
 
 // System Info
 export interface SystemInfo {

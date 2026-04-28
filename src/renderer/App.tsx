@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline, Snackbar, Alert } from '@mui/m
 import { useTranslation } from 'react-i18next';
 import useStore from './store/useStore';
 import Layout from './components/Layout';
+import UpdateNotification from './components/UpdateNotification';
 import ProcessesPage from './pages/ProcessesPage';
 import SettingsPage from './pages/SettingsPage';
 import LogsPage from './pages/LogsPage';
@@ -69,6 +70,7 @@ function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <GlobalSnackbar />
+            <UpdateNotification />
             {import.meta.env.DEV ? (
                 <BrowserRouter>
                     <Layout>

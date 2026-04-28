@@ -121,7 +121,7 @@ const ProcessesPage: React.FC = () => {
                     </Typography>
                     <Typography
                         variant='caption'
-                        color='textSecondary'
+                        color='text.secondary'
                         noWrap
                         sx={{
                             maxWidth: '40ch',
@@ -272,7 +272,7 @@ const ProcessesPage: React.FC = () => {
                         {servers.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={6} align='center'>
-                                    <Typography variant='body2' color='textSecondary'>
+                                    <Typography variant='body2' color='text.secondary'>
                                         No MCP servers configured
                                     </Typography>
                                 </TableCell>

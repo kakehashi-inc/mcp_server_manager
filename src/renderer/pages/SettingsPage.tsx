@@ -135,9 +135,9 @@ const SettingsPage: React.FC = () => {
                                 logRetentionDays: parseInt(e.target.value) || 7,
                             })
                         }
-                        InputProps={{
-                            inputProps: { min: 1, max: 365 },
-                            endAdornment: t('settings.days'),
+                        slotProps={{
+                            htmlInput: { min: 1, max: 365 },
+                            input: { endAdornment: t('settings.days') },
                         }}
                     />
                 </Box>
@@ -159,7 +159,7 @@ const SettingsPage: React.FC = () => {
                                 restartDelayMs: Math.max(0, parseInt(e.target.value) || 0),
                             })
                         }
-                        InputProps={{ inputProps: { min: 0, step: 100 } }}
+                        slotProps={{ htmlInput: { min: 0, step: 100 } }}
                         fullWidth
                     />
 
@@ -173,7 +173,7 @@ const SettingsPage: React.FC = () => {
                                 successfulStartThresholdMs: Math.max(0, parseInt(e.target.value) || 0),
                             })
                         }
-                        InputProps={{ inputProps: { min: 0, step: 1000 } }}
+                        slotProps={{ htmlInput: { min: 0, step: 1000 } }}
                         fullWidth
                     />
                 </Box>

@@ -10,8 +10,8 @@ portable:
 publish:
   provider: github
   owner: kakehashi-inc
-  repo: https://github.com/kakehashi-inc/mcp_server_manager.git
-  releaseType: release
+  repo: mcp_server_manager
+  releaseType: draft
 releaseInfo:
   releaseName: "v${version}"
   releaseNotes: |

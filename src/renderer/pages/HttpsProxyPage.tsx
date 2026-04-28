@@ -278,7 +278,7 @@ const HttpsProxyPage: React.FC = () => {
 
             {/* Logs panel */}
             <Paper sx={{ p: 2, mt: 3, display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 1 }}>
+                <Stack direction='row' spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
                     <Typography variant='h6' sx={{ mr: 1 }}>
                         {t('common.logs')}
                     </Typography>

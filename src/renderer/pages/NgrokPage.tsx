@@ -112,7 +112,7 @@ const NgrokPage: React.FC = () => {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
+            <Stack direction='row' sx={{ mb: 2, justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant='h4'>{t('ngrok.title')}</Typography>
                 <Stack direction='row' spacing={1}>
                     <Button variant='contained' onClick={handleStart} disabled={busy || tunnels.length > 0}>
@@ -131,7 +131,7 @@ const NgrokPage: React.FC = () => {
             )}
 
             <Paper sx={{ p: 2, mb: 3, flexShrink: 0 }}>
-                <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
+                <Stack direction='row' sx={{ mb: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant='h6'>{t('common.status')}</Typography>
                     <Typography variant='body2' color='text.secondary'>
                         {tunnels.length > 0 ? t('common.running') : t('common.stopped')}
@@ -183,7 +183,7 @@ const NgrokPage: React.FC = () => {
             </Paper>
 
             <Paper sx={{ p: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 1, flexShrink: 0 }}>
+                <Stack direction='row' spacing={1} sx={{ mb: 1, flexShrink: 0, alignItems: 'center' }}>
                     <Typography variant='h6' sx={{ mr: 1 }}>
                         {t('common.logs')}
                     </Typography>

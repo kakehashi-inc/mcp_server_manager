@@ -39,6 +39,13 @@ const IPC_CHANNELS = {
     HTTPS_PROXY_REGENERATE_CERT: 'https-proxy:regenerate-cert',
     HTTPS_PROXY_LOG_READ: 'https-proxy:log:read',
     HTTPS_PROXY_LOG_CLEAR: 'https-proxy:log:clear',
+
+    // Updater
+    UPDATER_CHECK: 'updater:check',
+    UPDATER_DOWNLOAD: 'updater:download',
+    UPDATER_QUIT_AND_INSTALL: 'updater:quit-and-install',
+    UPDATER_GET_STATE: 'updater:get-state',
+    UPDATER_STATE_CHANGED: 'updater:state-changed',
 } as const;
 
 // Expose protected methods that allow the renderer process to use
@@ -119,6 +126,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
         maximize: () => ipcRenderer.send(IPC_CHANNELS.APP_MAXIMIZE),
         close: (force?: boolean) => ipcRenderer.send(IPC_CHANNELS.APP_QUIT, !!force),
     },
+
+    // Updater
+    updater: {
+        getState: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATER_GET_STATE),
+        check: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATER_CHECK),
+        download: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATER_DOWNLOAD),
+        quitAndInstall: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATER_QUIT_AND_INSTALL),
+        onStateChanged: (callback: (state: any) => void) => {
+            const listener = (_: unknown, state: any) => callback(state);
+            ipcRenderer.on(IPC_CHANNELS.UPDATER_STATE_CHANGED, listener);
+            return () => {
+                ipcRenderer.removeListener(IPC_CHANNELS.UPDATER_STATE_CHANGED, listener);
+            };
+        },
+    },
 });
 
 // Type declarations for TypeScript
@@ -179,6 +201,22 @@ declare global {
                 maximize: () => void;
                 close: (force?: boolean) => void;
             };
+            updater: {
+                getState: () => Promise<UpdateStateBridge>;
+                check: () => Promise<void>;
+                download: () => Promise<void>;
+                quitAndInstall: () => Promise<void>;
+                onStateChanged: (callback: (state: UpdateStateBridge) => void) => () => void;
+            };
         };
     }
+}
+
+type UpdateStatusBridge = 'idle' | 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
+
+interface UpdateStateBridge {
+    status: UpdateStatusBridge;
+    version?: string;
+    progress?: number;
+    error?: string;
 }

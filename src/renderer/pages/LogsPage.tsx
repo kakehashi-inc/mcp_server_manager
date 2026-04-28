@@ -116,7 +116,7 @@ const LogsPage: React.FC = () => {
                     type='number'
                     value={lineCount}
                     onChange={e => setLineCount(parseInt(e.target.value) || 100)}
-                    InputProps={{ inputProps: { min: 10, max: 1000 } }}
+                    slotProps={{ htmlInput: { min: 10, max: 1000 } }}
                     sx={{ width: 120 }}
                     size='small'
                 />

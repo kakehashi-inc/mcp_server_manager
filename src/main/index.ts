@@ -7,6 +7,7 @@ import { ConfigManager } from './services/ConfigManager';
 import { LogManager } from './services/LogManager';
 import { NgrokMultiTunnelManager } from './services/NgrokMultiTunnelManager';
 import { HttpsProxyManager } from './services/HttpsProxyManager';
+import { updaterService } from './services/UpdaterService';
 import { SystemUtils } from './utils/SystemUtils';
 
 let mainWindow: BrowserWindow | null = null;
@@ -269,8 +270,12 @@ async function initializeServices() {
 
 app.whenReady().then(async () => {
     await initializeServices();
+    updaterService.initialize();
     createTray();
     createWindow();
+    if (mainWindow) {
+        updaterService.scheduleStartupCheck(mainWindow);
+    }
 
     app.on('activate', () => {
         showMainWindow();

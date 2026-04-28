@@ -6,6 +6,7 @@ import { LogManager } from '../services/LogManager';
 import { SystemUtils } from '../utils/SystemUtils';
 import { NgrokMultiTunnelManager } from '../services/NgrokMultiTunnelManager';
 import { HttpsProxyManager } from '../services/HttpsProxyManager';
+import { updaterService } from '../services/UpdaterService';
 
 export function initializeIPC(
     processManager: ProcessManager,
@@ -163,5 +164,19 @@ export function initializeIPC(
         try {
             await httpsProxyManager.clearLogs(hostname);
         } catch {}
+    });
+
+    // Updater
+    ipcMain.handle(IPC_CHANNELS.UPDATER_GET_STATE, async () => {
+        return updaterService.getState();
+    });
+    ipcMain.handle(IPC_CHANNELS.UPDATER_CHECK, async () => {
+        await updaterService.checkForUpdates();
+    });
+    ipcMain.handle(IPC_CHANNELS.UPDATER_DOWNLOAD, async () => {
+        await updaterService.downloadUpdate();
+    });
+    ipcMain.handle(IPC_CHANNELS.UPDATER_QUIT_AND_INSTALL, async () => {
+        updaterService.quitAndInstall();
     });
 }
