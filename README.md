@@ -146,12 +146,27 @@ DevTools in development:
 
 ### Build/Distribute
 
-- All platforms: `yarn dist`
 - Windows: `yarn dist:win`
 - macOS: `yarn dist:mac`
 - Linux: `yarn dist:linux`
 
 In development the app uses BrowserRouter with `<http://localhost:3001>`, and in production it uses HashRouter to load `dist/renderer/index.html`.
+
+### Direct Release to GitHub (for Auto-Update)
+
+These commands directly upload the build artifacts and `latest*.yml` (auto-update metadata) to the GitHub repository configured in `publish:` of `electron-builder.yml`. Because of the `releaseType: draft` setting, each command **aggregates into the same draft release for that version** on GitHub. Once all platforms are in place, press "Publish release" in the GitHub UI to deliver it to users.
+
+- Windows: `yarn release:win`
+- macOS: `yarn release:mac`
+- Linux: `yarn release:linux`
+
+Before running, set a GitHub Personal Access Token (`public_repo` scope) in the `GH_TOKEN` environment variable.
+
+```bash
+export GH_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+```
+
+When building each platform on multiple machines, make sure the `version` in `package.json` matches across all machines, then run the corresponding `release:*` command on each machine in turn.
 
 ### macOS Prerequisite: Signing & Notarization Environment Variables
 
