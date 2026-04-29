@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Auto-update support via `electron-updater` (GitHub provider). Notifies the user with a Snackbar when a new version is available, downloads and applies the update from the renderer.
 - IPC channels for the updater (`updater:check`, `updater:download`, `updater:quit-and-install`, `updater:get-state`, `updater:state-changed`) and a preload `updater` bridge API.
 - i18n keys (`updater.confirm`, `updater.update`, `updater.later`, `updater.downloading`, `updater.installing`) for ja/en.
+- `scripts/zip-portable.js`: electron-builder `afterAllArtifactBuild` hook that compresses the Windows portable `.exe` into a `.zip` and removes the original `.exe`. Mitigates SmartScreen and AV warnings caused by serving an unsigned raw executable.
 
 ### Changed
 
@@ -19,3 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Set `tsconfig.json` `moduleResolution` to `"bundler"` (required by MUI v9 `.d.mts`-only types) and override it to `"node"` in `tsconfig.main.json` (CommonJS main process).
 - Migrate MUI v9 deprecations: move `alignItems`/`justifyContent` from `Stack` props into `sx`, replace `TextField` `InputProps` with `slotProps`, and replace legacy `Typography` `color='textSecondary'` with `color='text.secondary'`.
 - `electron-builder.yml`: switch `publish.repo` to a bare repository name and set `publish.releaseType` to `draft` so per-platform release commands aggregate into the same draft release.
+- `UpdaterService`: skip all auto-updater operations when running from the portable build (detected via `process.env.PORTABLE_EXECUTABLE_FILE`). Prevents the portable executable from downloading and launching the NSIS installer.

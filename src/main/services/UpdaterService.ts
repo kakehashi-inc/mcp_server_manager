@@ -4,6 +4,9 @@ import { IPC_CHANNELS } from '../../shared/types';
 import type { UpdateState } from '../../shared/types';
 
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
+// electron-builder injects PORTABLE_EXECUTABLE_FILE only when the app is launched from the portable exe.
+// In that case the auto-updater must be skipped to avoid pulling the NSIS installer via latest.yml.
+const isPortable = !!process.env.PORTABLE_EXECUTABLE_FILE;
 
 class UpdaterService {
     private state: UpdateState = { status: 'idle' };
@@ -12,7 +15,7 @@ class UpdaterService {
     private initialized = false;
 
     initialize(): void {
-        if (isDev) return;
+        if (isDev || isPortable) return;
         if (this.initialized) return;
         this.initialized = true;
 
@@ -60,7 +63,7 @@ class UpdaterService {
     }
 
     async checkForUpdates(): Promise<void> {
-        if (isDev) return;
+        if (isDev || isPortable) return;
         try {
             await autoUpdater.checkForUpdates();
         } catch (err) {
@@ -69,7 +72,7 @@ class UpdaterService {
     }
 
     async downloadUpdate(): Promise<void> {
-        if (isDev) return;
+        if (isDev || isPortable) return;
         this.autoInstallOnDownloaded = true;
         try {
             await autoUpdater.downloadUpdate();
@@ -80,7 +83,7 @@ class UpdaterService {
     }
 
     quitAndInstall(): void {
-        if (isDev) return;
+        if (isDev || isPortable) return;
         setImmediate(() => {
             for (const w of BrowserWindow.getAllWindows()) {
                 try {
@@ -97,7 +100,7 @@ class UpdaterService {
     }
 
     scheduleStartupCheck(window: BrowserWindow, delayMs = 3000): void {
-        if (isDev) return;
+        if (isDev || isPortable) return;
         if (this.startupCheckScheduled) return;
         this.startupCheckScheduled = true;
 
