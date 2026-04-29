@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 8
+  version: 9
   cacheKey: 10c0
 
 "7zip-bin@npm:~5.2.0":
@@ -3170,7 +3170,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-updater@npm:6.8.4":
+"electron-updater@npm:^6.8.4":
   version: 6.8.4
   resolution: "electron-updater@npm:6.8.4"
   dependencies:
@@ -5191,7 +5191,7 @@ __metadata:
     concurrently: "npm:^9.2.1"
     electron: "npm:^41.3.0"
     electron-builder: "npm:^26.9.0"
-    electron-updater: "npm:6.8.4"
+    electron-updater: "npm:^6.8.4"
     eslint: "npm:^10.2.1"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.1.1"
